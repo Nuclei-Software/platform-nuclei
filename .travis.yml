@@ -1,0 +1,22 @@
+language: python
+python:
+  - "2.7"
+  - "3.6"
+
+env:
+  - PLATFORMIO_PROJECT_DIR=examples/coremark
+  - PLATFORMIO_PROJECT_DIR=examples/dhrystone
+  - PLATFORMIO_PROJECT_DIR=examples/whestone
+  - PLATFORMIO_PROJECT_DIR=examples/helloworld
+  - PLATFORMIO_PROJECT_DIR=examples/freertos_demo
+  - PLATFORMIO_PROJECT_DIR=examples/ucosii_demo
+  
+install:
+  - pip install -U https://github.com/platformio/platformio/archive/develop.zip
+  - platformio platform install file://.
+
+script:
+  - platformio run -d $PLATFORMIO_PROJECT_DIR
+
+notifications:
+  email: false

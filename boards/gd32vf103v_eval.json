@@ -1,0 +1,38 @@
+{
+    "build": {
+        "f_cpu": "108000000L",
+        "hwids": [
+            [
+                "0x0403",
+                "0x6010"
+            ]
+        ],
+        "ldscript": "",
+        "mabi": "ilp32",
+        "march": "rv32imac",
+        "mcmodel": "medlow",
+        "soc": "gd32vf103",
+        "mcu": "GD32VF103VBT6",
+        "variant": "gd32vf103_eval",
+        "board_def": "BOARD_GD32VF103_EVAL",
+        "hxtal_value": "8000000",
+        "download": "flashxip",
+        "download_modes": [
+            "flashxip"
+        ]
+    },
+    "frameworks": [
+        "nuclei-sdk"
+    ],
+    "name": "GD32VF103V Evaluation Kit",
+    "upload": {
+        "maximum_ram_size": 32768,
+        "maximum_size": 131072,
+        "protocol": "nuclei-rv-debugger",
+        "protocols": [
+            "nuclei-rv-debugger"
+        ]
+    },
+    "url": "https://www.gigadevice.com/",
+    "vendor": "GigaDevice"
+}

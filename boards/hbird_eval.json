@@ -1,0 +1,42 @@
+{
+  "build": {
+    "f_cpu": "5000000L",
+    "hwids": [
+      [
+        "0x0403",
+        "0x6010"
+      ]
+    ],
+    "ldscript": "",
+    "mabi": "",
+    "march": "",
+    "mcmodel": "medany",
+    "soc": "hbird",
+    "mcu": "HummingBird",
+    "core": "n307fd",
+    "download": "flash",
+    "download_modes": [
+      "ilm",
+      "flash",
+      "flashxip"
+    ]
+  },
+  "debug": {
+    "svd_path": "HBIRD.svd"
+  },
+  "frameworks": [
+    "nuclei-sdk"
+  ],
+  "name": "HummingBird Evaluation Kit",
+  "upload": {
+    "maximum_ram_size": 65536,
+    "maximum_size": 65536,
+    "ilm_start": "0x80000000",
+    "protocol": "nuclei-rv-debugger",
+    "protocols": [
+      "nuclei-rv-debugger"
+    ]
+  },
+  "url": "https://nucleisys.com/",
+  "vendor": "Nuclei"
+}
