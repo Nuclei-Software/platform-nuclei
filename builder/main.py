@@ -98,17 +98,25 @@ download_mode = board_config.get("build.download", "").lower().strip()
 upload_actions = []
 upload_target = target_elf
 
-if upload_protocol.startswith("jlink"):
+program_start = ""
+if download_mode == "ilm":
+    program_start = board_config.get("upload").get("ilm_start", "")
+else:
+    program_start = board_config.get("upload").get("flash_start", "")
 
+if upload_protocol.startswith("jlink"):
     def _jlink_cmd_script(env, source):
         build_dir = env.subst("$BUILD_DIR")
         if not isdir(build_dir):
             makedirs(build_dir)
         script_path = join(build_dir, "upload.jlink")
+        setPC = "" if program_start == "" else "setPC %s" % program_start
         commands = [
             "h",
             "loadfile %s" % source,
             "r",
+            setPC,
+            "go",
             "q"
         ]
         with open(script_path, "w") as fp:
@@ -145,8 +153,7 @@ elif upload_protocol in debug_tools:
     else:
         openocd_args.extend([
             "-c", "reset halt; flash protect 0 0 last off;",
-            "-c", "program {$SOURCE} %s verify; reset; shutdown;" %
-            board_config.get("upload").get("flash_start", "")
+            "-c", "program {$SOURCE} %s verify; reset; shutdown;" % program_start
         ])
     env.Replace(
         UPLOADER="openocd",

@@ -37,7 +37,8 @@ class NucleiPlatform(PlatformBase):
         build = board.manifest.get("build", {})
         non_debug_protocols = ["serial"]
         supported_debug_tools = [
-            "nuclei-rv-debugger"
+            "nuclei-rv-debugger",
+            "jlink"
         ]
         non_ftdi_tools = [
             "jlink", "gd-link", "altera-usb-blaster"
@@ -70,6 +71,44 @@ class NucleiPlatform(PlatformBase):
                 server_args = [
                     "-f", board_cfg
                 ]
+            elif link == "jlink":
+                assert debug.get("jlink_device"), (
+                    "Missed J-Link Device ID for %s" % board.id)
+                debug['tools'][link] = {
+                    "server": {
+                        "package": "tool-jlink",
+                        "arguments": [
+                            "-singlerun",
+                            "-if", "JTAG",
+                            "-select", "USB",
+                            "-jtagconf", "-1,-1",
+                            "-device", debug.get("jlink_device"),
+                            "-port", "2331"
+                        ],
+                        "executable": ("JLinkGDBServerCL.exe"
+                                       if system() == "Windows" else
+                                       "JLinkGDBServer")
+                    },
+                    "init_cmds": [
+                        "define pio_reset_halt_target",
+                        "    monitor halt",
+                        "end",
+                        "",
+                        "define pio_reset_run_target",
+                        "    monitor clrbp",
+                        "    monitor reset",
+                        "    monitor go",
+                        "end",
+                        "",
+                        "target extended-remote $DEBUG_PORT",
+                        "monitor clrbp",
+                        "monitor speed auto",
+                        "pio_reset_halt_target",
+                        "$LOAD_CMDS",
+                        "$INIT_BREAK"
+                    ],
+                    "onboard": link in debug.get("onboard_tools", [])
+                }
             elif link == "rv-link":
                 debug['tools']['rv-link'] = {
                     "hwids": [["0x28e9", "0x018a"]],
@@ -81,7 +120,7 @@ class NucleiPlatform(PlatformBase):
                 else:
                     openocd_interface = "ftdi/" + link
 
-            if link != "nuclei-rv-debugger":
+            if link != "nuclei-rv-debugger" and link != "jlink":
                 server_args = [
                     "-s", "$PACKAGE_DIR/share/openocd/scripts",
                     "-f", "interface/%s.cfg" % openocd_interface,
@@ -94,7 +133,7 @@ class NucleiPlatform(PlatformBase):
                 else:
                     server_args.append("adapter_khz 1000")
 
-            if link != "rv-link":
+            if link != "rv-link" and link != "jlink":
                 debug['tools'][link] = {
                     "server": {
                         "package": "tool-openocd-nuclei",
