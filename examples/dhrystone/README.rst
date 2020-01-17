@@ -20,7 +20,7 @@ How to build PlatformIO based project
 .. code-block:: bash
 
     # Change directory to example
-    > cd platform-nuclei/examples/helloworld
+    > cd platform-nuclei/examples/dhrystone
 
     # Build project
     > platformio run
