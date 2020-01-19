@@ -23,7 +23,10 @@
   },
   "debug": {
     "jlink_device": "RISC-V",
-    "svd_path": "HBIRD.svd"
+    "svd_path": "HBIRD.svd",
+    "onboard_tools": [
+      "nuclei-rv-debugger"
+    ]
   },
   "frameworks": [
     "nuclei-sdk"
