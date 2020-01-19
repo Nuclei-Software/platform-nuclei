@@ -154,7 +154,7 @@ elif upload_protocol in debug_tools:
     else:
         openocd_args.extend([
             "-c", "reset halt; flash protect 0 0 last off;",
-            "-c", "program {$SOURCE} %s verify; reset; shutdown;" % program_start
+            "-c", "program {$SOURCE} verify; reset; shutdown;"
         ])
     env.Replace(
         UPLOADER="openocd",
