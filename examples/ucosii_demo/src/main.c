@@ -1,3 +1,5 @@
+/* Copyright 2019-2020 Nuclei, Inc */
+
 #include <stdint.h>
 #include <ucos_ii.h>
 
