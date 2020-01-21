@@ -21,8 +21,7 @@ Open Source Software for Developing on the Nuclei N/NX processors
 https://github.com/Nuclei-Software/nuclei-sdk
 """
 import os
-from shutil import copyfile
-from os import makedirs, listdir
+from os import listdir
 from os.path import isdir, join
 import re
 
@@ -34,6 +33,31 @@ build_board = board.id
 
 FRAMEWORK_DIR = env.PioPlatform().get_package_dir("framework-nuclei-sdk")
 FRAMEWORK_NUCLEI_SOC_CORES_MK = join(FRAMEWORK_DIR, "Build", "Makefile.core")
+
+def is_valid_soc(soc):
+    soc_dir = join(FRAMEWORK_DIR, "SoC", soc)
+    return isdir(soc_dir)
+
+def get_extra_soc_board_incdirs(soc, board):
+    soc_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Common", "Include")
+    board_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Board", board, "Include")
+    incdirs = []
+
+    # Add include directories in SoC/<soc>/Common/Include/<sub>
+    if isdir(soc_inc_dir_root):
+        for dir in listdir(soc_inc_dir_root):
+            dir_path = join(soc_inc_dir_root, dir)
+            if isdir(dir_path):
+                incdirs.append(dir_path)
+
+    # Add include directories in SoC/<soc>/Board/<board>/Include/<sub>
+    if isdir(board_inc_dir_root):
+        for dir in listdir(board_inc_dir_root):
+            dir_path = join(board_inc_dir_root, dir)
+            if isdir(dir_path):
+                incdirs.append(dir_path)
+
+    return incdirs
 
 def select_rtos_package(build_rtos):
     SUPPORTED_RTOSES = ["FreeRTOS", "UCOSII"]
@@ -128,31 +152,6 @@ else:
         print("No mabi and march specified in board json file, use default -march=%s -mabi=%s!" % (build_march, build_mabi))
 
 assert FRAMEWORK_DIR and isdir(FRAMEWORK_DIR)
-
-def is_valid_soc(soc):
-    soc_dir = join(FRAMEWORK_DIR, "SoC", soc)
-    return isdir(soc_dir)
-
-def get_extra_soc_board_incdirs(soc, board):
-    soc_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Common", "Include")
-    board_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Board", board, "Include")
-    incdirs = []
-
-    # Add include directories in SoC/<soc>/Common/Include/<sub>
-    if isdir(soc_inc_dir_root):
-        for dir in listdir(soc_inc_dir_root):
-            dir_path = join(soc_inc_dir_root, dir)
-            if isdir(dir_path):
-                incdirs.append(dir_path)
-
-    # Add include directories in SoC/<soc>/Board/<board>/Include/<sub>
-    if isdir(board_inc_dir_root):
-        for dir in listdir(board_inc_dir_root):
-            dir_path = join(board_inc_dir_root, dir)
-            if isdir(dir_path):
-                incdirs.append(dir_path)
-    
-    return incdirs
 
 env.SConscript("_bare.py", exports="env")
 
