@@ -13,9 +13,6 @@
         "mcmodel": "medlow",
         "soc": "gd32vf103",
         "mcu": "GD32VF103VBT6",
-        "variant": "gd32vf103_rvstar",
-        "board_def": "BOARD_GD32VF103_EVAL",
-        "hxtal_value": "8000000",
         "download": "flashxip",
         "download_modes": [
             "flashxip"

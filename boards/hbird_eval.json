@@ -1,47 +1,45 @@
 {
-  "build": {
-    "f_cpu": "5000000L",
-    "hwids": [
-      [
-        "0x0403",
-        "0x6010"
-      ]
+    "build": {
+        "f_cpu": "5000000L",
+        "hwids": [
+            [
+                "0x0403",
+                "0x6010"
+            ]
+        ],
+        "ldscript": "",
+        "mcmodel": "medany",
+        "soc": "hbird",
+        "mcu": "HummingBird",
+        "core": "n307fd",
+        "download": "flash",
+        "download_modes": [
+            "ilm",
+            "flash",
+            "flashxip"
+        ]
+    },
+    "debug": {
+        "jlink_device": "RISC-V",
+        "svd_path": "HBIRD.svd",
+        "onboard_tools": [
+            "nuclei-rv-debugger"
+        ]
+    },
+    "frameworks": [
+        "nuclei-sdk"
     ],
-    "ldscript": "",
-    "mabi": "",
-    "march": "",
-    "mcmodel": "medany",
-    "soc": "hbird",
-    "mcu": "HummingBird",
-    "core": "n307fd",
-    "download": "flash",
-    "download_modes": [
-      "ilm",
-      "flash",
-      "flashxip"
-    ]
-  },
-  "debug": {
-    "jlink_device": "RISC-V",
-    "svd_path": "HBIRD.svd",
-    "onboard_tools": [
-      "nuclei-rv-debugger"
-    ]
-  },
-  "frameworks": [
-    "nuclei-sdk"
-  ],
-  "name": "HummingBird Evaluation Kit",
-  "upload": {
-    "maximum_ram_size": 65536,
-    "maximum_size": 65536,
-    "ilm_start": "0x80000000",
-    "flash_start": "0x20000000",
-    "protocol": "nuclei-rv-debugger",
-    "protocols": [
-      "nuclei-rv-debugger"
-    ]
-  },
-  "url": "https://nucleisys.com/",
-  "vendor": "Nuclei"
+    "name": "HummingBird Evaluation Kit",
+    "upload": {
+        "maximum_ram_size": 65536,
+        "maximum_size": 65536,
+        "ilm_start": "0x80000000",
+        "flash_start": "0x20000000",
+        "protocol": "nuclei-rv-debugger",
+        "protocols": [
+            "nuclei-rv-debugger"
+        ]
+    },
+    "url": "https://nucleisys.com/",
+    "vendor": "Nuclei"
 }
