@@ -87,7 +87,7 @@ core_arch_abis = parse_nuclei_soc_predefined_cores(FRAMEWORK_NUCLEI_SOC_CORES_MK
 build_soc = board.get("build.soc", "").strip()
 
 if build_soc == "":
-    print("build.soc is not defined in board description json file, please check!")
+    sys.stderr.write("build.soc is not defined in board description json file, please check!")
     env.Exit(1)
 
 BUILTIN_ALL_DOWNLOADED_MODES = ["ilm", "flash", "flashxip"]
@@ -204,7 +204,7 @@ env.Replace(
 )
 
 if not is_valid_soc(build_soc):
-    print ("Could not find BSP package for SoC %s" % build_soc)
+    sys.stderr.write("Could not find BSP package for SoC %s" % build_soc)
     env.Exit(1)
 
 #
