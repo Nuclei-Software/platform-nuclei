@@ -4,7 +4,7 @@ environment:
   matrix:
     - PLATFORMIO_PROJECT_DIR: "examples/coremark"
     - PLATFORMIO_PROJECT_DIR: "examples/dhrystone"
-    - PLATFORMIO_PROJECT_DIR: "examples/whestone"
+    - PLATFORMIO_PROJECT_DIR: "examples/whetstone"
     - PLATFORMIO_PROJECT_DIR: "examples/helloworld"
     - PLATFORMIO_PROJECT_DIR: "examples/freertos_demo"
     - PLATFORMIO_PROJECT_DIR: "examples/ucosii_demo"
