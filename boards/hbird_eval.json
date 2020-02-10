@@ -22,7 +22,7 @@
     "jlink_device": "RISC-V",
     "svd_path": "HBIRD.svd",
     "onboard_tools": [
-      "nuclei-rv-debugger"
+      "rv-link"
     ]
   },
   "frameworks": [
@@ -34,9 +34,9 @@
     "maximum_size": 65536,
     "ilm_start": "0x80000000",
     "flash_start": "0x20000000",
-    "protocol": "nuclei-rv-debugger",
+    "protocol": "rv-link",
     "protocols": [
-      "nuclei-rv-debugger"
+      "rv-link"
     ]
   },
   "url": "https://nucleisys.com/",
