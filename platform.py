@@ -20,7 +20,6 @@ from platformio.managers.platform import PlatformBase
 
 
 class NucleiPlatform(PlatformBase):
-
     def get_boards(self, id_=None):
         result = PlatformBase.get_boards(self, id_)
         if not result:
@@ -37,13 +36,8 @@ class NucleiPlatform(PlatformBase):
         debug = board.manifest.get("debug", {})
         build = board.manifest.get("build", {})
         non_debug_protocols = ["serial"]
-        supported_debug_tools = [
-            "nuclei-rv-debugger",
-            "jlink"
-        ]
-        non_ftdi_tools = [
-            "jlink", "gd-link", "altera-usb-blaster"
-        ]
+        supported_debug_tools = ["nuclei-rv-debugger", "jlink"]
+        non_ftdi_tools = ["jlink", "gd-link", "altera-usb-blaster"]
         upload_protocol = board.manifest.get("upload", {}).get("protocol")
         upload_protocols = board.manifest.get("upload", {}).get("protocols", [])
         upload_protocols.extend(supported_debug_tools)
@@ -65,30 +59,48 @@ class NucleiPlatform(PlatformBase):
 
             if link == "nuclei-rv-debugger":
                 board_cfg = join(
-                    sdk_dir, "SoC", build_soc, "Board", build_board, "openocd_%s.cfg" % build_soc)
+                    sdk_dir or "",
+                    "SoC",
+                    build_soc,
+                    "Board",
+                    build_board,
+                    "openocd_%s.cfg" % build_soc,
+                )
                 if not isfile(board_cfg):
                     board_cfg = join(
-                        sdk_dir, "SoC", build_soc, "Board", build_board, "openocd.cfg")
-                server_args = [
-                    "-f", board_cfg
-                ]
+                        sdk_dir or "",
+                        "SoC",
+                        build_soc,
+                        "Board",
+                        build_board,
+                        "openocd.cfg",
+                    )
+                server_args = ["-f", board_cfg]
             elif link == "jlink":
                 assert debug.get("jlink_device"), (
-                    "Missed J-Link Device ID for %s" % board.id)
+                    "Missed J-Link Device ID for %s" % board.id
+                )
                 debug["tools"][link] = {
                     "server": {
                         "package": "tool-jlink",
                         "arguments": [
                             "-singlerun",
-                            "-if", "JTAG",
-                            "-select", "USB",
-                            "-jtagconf", "-1,-1",
-                            "-device", debug.get("jlink_device"),
-                            "-port", "2331"
+                            "-if",
+                            "JTAG",
+                            "-select",
+                            "USB",
+                            "-jtagconf",
+                            "-1,-1",
+                            "-device",
+                            debug.get("jlink_device"),
+                            "-port",
+                            "2331",
                         ],
-                        "executable": ("JLinkGDBServerCL.exe"
-                                       if system() == "Windows" else
-                                       "JLinkGDBServer")
+                        "executable": (
+                            "JLinkGDBServerCL.exe"
+                            if system() == "Windows"
+                            else "JLinkGDBServer"
+                        ),
                     },
                     "init_cmds": [
                         "define pio_reset_halt_target",
@@ -106,34 +118,39 @@ class NucleiPlatform(PlatformBase):
                         "monitor speed auto",
                         "pio_reset_halt_target",
                         "$LOAD_CMDS",
-                        "$INIT_BREAK"
+                        "$INIT_BREAK",
                     ],
-                    "onboard": link in debug.get("onboard_tools", [])
+                    "onboard": link in debug.get("onboard_tools", []),
                 }
             elif link == "rv-link":
                 debug["tools"]["rv-link"] = {
                     "hwids": [["0x28e9", "0x018a"]],
-                    "require_debug_port": True
+                    "require_debug_port": True,
                 }
             else:
                 openocd_interface = link if link in non_ftdi_tools else "ftdi/" + link
 
             if link not in ("nuclei-rv-debugger", "jlink"):
                 server_args = [
-                    "-s", "$PACKAGE_DIR/share/openocd/scripts",
-                    "-f", "interface/%s.cfg" % openocd_interface,
-                    "-c", "transport select jtag",
-                    "-f", "target/%s.cfg" % build_soc
+                    "-s",
+                    "$PACKAGE_DIR/share/openocd/scripts",
+                    "-f",
+                    "interface/%s.cfg" % openocd_interface,
+                    "-c",
+                    "transport select jtag",
+                    "-f",
+                    "target/%s.cfg" % build_soc,
                 ]
                 server_args.extend(
-                    ["-c", "adapter_khz %d" % 8000 if link == "um232h" else 1000])
+                    ["-c", "adapter_khz %d" % 8000 if link == "um232h" else 1000]
+                )
 
             if link not in ("rv-link", "jlink"):
                 debug["tools"][link] = {
                     "server": {
                         "package": "tool-openocd-nuclei",
                         "executable": "bin/openocd",
-                        "arguments": server_args
+                        "arguments": server_args,
                     },
                     "init_cmds": [
                         "define pio_reset_halt_target",
@@ -145,10 +162,10 @@ class NucleiPlatform(PlatformBase):
                         "target extended-remote $DEBUG_PORT",
                         "$LOAD_CMDS",
                         "pio_reset_halt_target",
-                        "$INIT_BREAK"
+                        "$INIT_BREAK",
                     ],
                     "onboard": link in debug.get("onboard_tools", []),
-                    "default": link in debug.get("default_tools", [])
+                    "default": link in debug.get("default_tools", []),
                 }
 
         board.manifest["debug"] = debug
