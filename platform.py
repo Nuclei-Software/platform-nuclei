@@ -134,7 +134,7 @@ class NucleiPlatform(PlatformBase):
                     "target/%s.cfg" % build_soc,
                 ]
                 server_args.extend(
-                    ["-c", "adapter_khz %d" % 8000 if link == "um232h" else 1000]
+                    ["-c", "adapter_khz %d" % (8000 if link == "um232h" else 1000)]
                 )
 
             if link != "jlink":
