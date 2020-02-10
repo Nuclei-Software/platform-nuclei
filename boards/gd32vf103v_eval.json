@@ -1,40 +1,39 @@
 {
-    "build": {
-        "f_cpu": "108000000L",
-        "hwids": [
-            [
-                "0x0403",
-                "0x6010"
-            ]
-        ],
-        "ldscript": "",
-        "mabi": "ilp32",
-        "march": "rv32imac",
-        "mcmodel": "medlow",
-        "soc": "gd32vf103",
-        "mcu": "GD32VF103VBT6",
-        "download": "flashxip",
-        "download_modes": [
-            "flashxip"
-        ]
-    },
-    "debug": {
-        "jlink_device": "GD32VF103VBT6",
-        "svd_path": "GD32VF103.svd"
-    },
-    "frameworks": [
-        "nuclei-sdk"
+  "build": {
+    "f_cpu": "108000000L",
+    "hwids": [
+      [
+        "0x0403",
+        "0x6010"
+      ]
     ],
-    "name": "GD32VF103V Evaluation Kit",
-    "upload": {
-        "maximum_ram_size": 32768,
-        "maximum_size": 131072,
-        "flash_start": "0x08000000",
-        "protocol": "nuclei-rv-debugger",
-        "protocols": [
-            "nuclei-rv-debugger"
-        ]
-    },
-    "url": "https://www.gigadevice.com/",
-    "vendor": "GigaDevice"
+    "mabi": "ilp32",
+    "march": "rv32imac",
+    "mcmodel": "medlow",
+    "soc": "gd32vf103",
+    "mcu": "gd32vf103vbt6",
+    "download": "flashxip",
+    "download_modes": [
+      "flashxip"
+    ]
+  },
+  "debug": {
+    "jlink_device": "GD32VF103VBT6",
+    "svd_path": "GD32VF103.svd"
+  },
+  "frameworks": [
+    "nuclei-sdk"
+  ],
+  "name": "GD32VF103V Evaluation Kit",
+  "upload": {
+    "maximum_ram_size": 32768,
+    "maximum_size": 131072,
+    "flash_start": "0x08000000",
+    "protocol": "nuclei-rv-debugger",
+    "protocols": [
+      "nuclei-rv-debugger"
+    ]
+  },
+  "url": "https://www.gigadevice.com/",
+  "vendor": "GigaDevice"
 }

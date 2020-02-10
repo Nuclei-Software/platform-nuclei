@@ -17,7 +17,7 @@ from os.path import isfile, join
 from platform import system
 
 from platformio.managers.platform import PlatformBase
-from platformio.util import get_systype
+
 
 class NucleiPlatform(PlatformBase):
 
@@ -44,38 +44,38 @@ class NucleiPlatform(PlatformBase):
         non_ftdi_tools = [
             "jlink", "gd-link", "altera-usb-blaster"
         ]
-
         upload_protocol = board.manifest.get("upload", {}).get("protocol")
         upload_protocols = board.manifest.get("upload", {}).get("protocols", [])
         upload_protocols.extend(supported_debug_tools)
         if upload_protocol and upload_protocol not in upload_protocols:
             upload_protocols.append(upload_protocol)
-        board.manifest['upload']['protocols'] = upload_protocols
+        board.manifest["upload"]["protocols"] = upload_protocols
 
         if "tools" not in debug:
-            debug['tools'] = {}
+            debug["tools"] = {}
 
         sdk_dir = self.get_package_dir("framework-nuclei-sdk")
         build_soc = build.get("soc", "").strip().lower()
-        build_download = build.get("download", "").lower().strip()
         build_board = board.id
 
         # Only FTDI based debug probes
         for link in upload_protocols:
-            if link in non_debug_protocols or link in debug['tools']:
+            if link in non_debug_protocols or link in debug["tools"]:
                 continue
 
             if link == "nuclei-rv-debugger":
-                board_cfg = join(sdk_dir, "SoC", "%s" % build_soc, "Board", build_board, "openocd_%s.cfg" % build_soc)
+                board_cfg = join(
+                    sdk_dir, "SoC", build_soc, "Board", build_board, "openocd_%s.cfg" % build_soc)
                 if not isfile(board_cfg):
-                    board_cfg = join(sdk_dir, "SoC", "%s" % build_soc, "Board", build_board, "openocd.cfg")
+                    board_cfg = join(
+                        sdk_dir, "SoC", build_soc, "Board", build_board, "openocd.cfg")
                 server_args = [
                     "-f", board_cfg
                 ]
             elif link == "jlink":
                 assert debug.get("jlink_device"), (
                     "Missed J-Link Device ID for %s" % board.id)
-                debug['tools'][link] = {
+                debug["tools"][link] = {
                     "server": {
                         "package": "tool-jlink",
                         "arguments": [
@@ -111,31 +111,25 @@ class NucleiPlatform(PlatformBase):
                     "onboard": link in debug.get("onboard_tools", [])
                 }
             elif link == "rv-link":
-                debug['tools']['rv-link'] = {
+                debug["tools"]["rv-link"] = {
                     "hwids": [["0x28e9", "0x018a"]],
                     "require_debug_port": True
                 }
             else:
-                if link in non_ftdi_tools:
-                    openocd_interface = link
-                else:
-                    openocd_interface = "ftdi/" + link
+                openocd_interface = link if link in non_ftdi_tools else "ftdi/" + link
 
-            if link != "nuclei-rv-debugger" and link != "jlink":
+            if link not in ("nuclei-rv-debugger", "jlink"):
                 server_args = [
                     "-s", "$PACKAGE_DIR/share/openocd/scripts",
                     "-f", "interface/%s.cfg" % openocd_interface,
                     "-c", "transport select jtag",
                     "-f", "target/%s.cfg" % build_soc
                 ]
-                server_args.append("-c")
-                if link in ["um232h"]:
-                    server_args.append("adapter_khz 8000")
-                else:
-                    server_args.append("adapter_khz 1000")
+                server_args.extend(
+                    ["-c", "adapter_khz %d" % 8000 if link == "um232h" else 1000])
 
-            if link != "rv-link" and link != "jlink":
-                debug['tools'][link] = {
+            if link not in ("rv-link", "jlink"):
+                debug["tools"][link] = {
                     "server": {
                         "package": "tool-openocd-nuclei",
                         "executable": "bin/openocd",
@@ -157,5 +151,5 @@ class NucleiPlatform(PlatformBase):
                     "default": link in debug.get("default_tools", [])
                 }
 
-        board.manifest['debug'] = debug
+        board.manifest["debug"] = debug
         return board
