@@ -36,7 +36,7 @@ class NucleiPlatform(PlatformBase):
         debug = board.manifest.get("debug", {})
         build = board.manifest.get("build", {})
         non_debug_protocols = ["serial"]
-        supported_debug_tools = ["rv-link", "jlink"]
+        supported_debug_tools = ["rv-link", "jlink", "gd-link", "altera-usb-blaster"]
         non_ftdi_tools = ["jlink", "gd-link", "rv-link", "altera-usb-blaster"]
         upload_protocol = board.manifest.get("upload", {}).get("protocol")
         upload_protocols = board.manifest.get("upload", {}).get("protocols", [])
