@@ -21,8 +21,6 @@ from SCons.Script import Import
 
 Import("env")
 
-board_config = env.BoardConfig()
-
 env.Append(
     CCFLAGS=[
         "-Os",
