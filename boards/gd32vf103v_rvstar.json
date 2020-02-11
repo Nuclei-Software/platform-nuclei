@@ -33,7 +33,13 @@
     "maximum_ram_size": 32768,
     "maximum_size": 131072,
     "flash_start": "0x08000000",
-    "protocol": "rv-link"
+    "protocol": "rv-link",
+    "protocols": [
+      "altera-usb-blaster",
+      "gd-link",
+      "jlink",
+      "rv-link"
+    ]
   },
   "url": "https://nucleisys.com/",
   "vendor": "Nuclei"

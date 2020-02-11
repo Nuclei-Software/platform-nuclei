@@ -35,15 +35,8 @@ class NucleiPlatform(PlatformBase):
         # debug tools
         debug = board.manifest.get("debug", {})
         build = board.manifest.get("build", {})
-        non_debug_protocols = ["serial"]
-        supported_debug_tools = ["rv-link", "jlink", "gd-link", "altera-usb-blaster"]
         non_ftdi_tools = ["jlink", "gd-link", "rv-link", "altera-usb-blaster"]
-        upload_protocol = board.manifest.get("upload", {}).get("protocol")
         upload_protocols = board.manifest.get("upload", {}).get("protocols", [])
-        upload_protocols.extend(supported_debug_tools)
-        if upload_protocol and upload_protocol not in upload_protocols:
-            upload_protocols.append(upload_protocol)
-        board.manifest["upload"]["protocols"] = upload_protocols
 
         if "tools" not in debug:
             debug["tools"] = {}
@@ -54,7 +47,7 @@ class NucleiPlatform(PlatformBase):
 
         # Only FTDI based debug probes
         for link in upload_protocols:
-            if link in non_debug_protocols or link in debug["tools"]:
+            if link in debug["tools"]:
                 continue
 
             if link == "rv-link":
