@@ -36,8 +36,6 @@
     "flash_start": "0x20000000",
     "protocol": "rv-link",
     "protocols": [
-      "altera-usb-blaster",
-      "gd-link",
       "rv-link"
     ]
   },
