@@ -6,6 +6,9 @@ environment:
     - PLATFORMIO_PROJECT_DIR: "examples/dhrystone"
     - PLATFORMIO_PROJECT_DIR: "examples/whetstone"
     - PLATFORMIO_PROJECT_DIR: "examples/helloworld"
+    - PLATFORMIO_PROJECT_DIR: "examples/demo_eclic"
+    - PLATFORMIO_PROJECT_DIR: "examples/demo_timer"
+    - PLATFORMIO_PROJECT_DIR: "examples/demo_dsp"
     - PLATFORMIO_PROJECT_DIR: "examples/freertos_demo"
     - PLATFORMIO_PROJECT_DIR: "examples/ucosii_demo"
 
