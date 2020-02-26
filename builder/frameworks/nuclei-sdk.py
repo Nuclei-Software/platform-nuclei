@@ -180,12 +180,17 @@ env.Append(
         "$PROJECT_SRC_DIR",
         "$PROJECT_INCLUDE_DIR",
         join(FRAMEWORK_DIR, "NMSIS", "Include"),
+        join(FRAMEWORK_DIR, "NMSIS", "Core", "Include"),
+        join(FRAMEWORK_DIR, "NMSIS", "DSP", "Include"),
+        join(FRAMEWORK_DIR, "NMSIS", "NN", "Include"),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include"),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Include"),
     ],
 
     LIBPATH=[
-        "$BUILD_DIR"
+        "$BUILD_DIR",
+        join(FRAMEWORK_DIR, "NMSIS", "Library", "DSP", "GCC"),
+        join(FRAMEWORK_DIR, "NMSIS", "Library", "NN", "GCC")
     ],
 
     LIBS=["gcc", "m"]
