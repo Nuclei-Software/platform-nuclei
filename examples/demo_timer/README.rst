@@ -20,7 +20,7 @@ How to build PlatformIO based project
 .. code-block:: bash
 
     # Change directory to example
-    > cd platform-nuclei/examples/timer_test
+    > cd platform-nuclei/examples/demo_timer
 
     # Build project
     > platformio run
