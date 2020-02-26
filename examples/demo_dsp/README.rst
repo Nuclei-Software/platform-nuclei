@@ -20,7 +20,7 @@ How to build PlatformIO based project
 .. code-block:: bash
 
     # Change directory to example
-    > cd platform-nuclei/examples/demo_eclic
+    > cd platform-nuclei/examples/demo_dsp
 
     # Build project
     > platformio run
