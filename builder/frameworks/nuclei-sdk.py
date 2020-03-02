@@ -169,7 +169,14 @@ env.Append(
     LINKFLAGS=[
         "-march=%s" % build_march,
         "-mabi=%s" % build_mabi,
-        "-mcmodel=%s" % build_mcmodel
+        "-mcmodel=%s" % build_mcmodel,
+        "-u", "_isatty",
+        "-u", "_write",
+        "-u", "_sbrk",
+        "-u", "_read",
+        "-u", "_close",
+        "-u", "_fstat",
+        "-u", "_lseek"
     ],
 
     CPPDEFINES=[
