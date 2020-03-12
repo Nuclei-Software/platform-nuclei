@@ -82,7 +82,7 @@ your application. */
 #define configUSE_TICKLESS_IDLE                 0
 #define configCPU_CLOCK_HZ                      SystemCoreClock
 #define configRTC_CLOCK_HZ						32768
-#define configTICK_RATE_HZ                      150
+#define configTICK_RATE_HZ                      100
 #define configMAX_PRIORITIES                    4
 #define configMINIMAL_STACK_SIZE                256
 #define configMAX_TASK_NAME_LEN                 16
@@ -127,13 +127,8 @@ your application. */
 #define configTIMER_QUEUE_LENGTH                5
 #define configTIMER_TASK_STACK_DEPTH            configMINIMAL_STACK_SIZE
 
-/* Interrupt nesting behaviour configuration.
-#define configKERNEL_INTERRUPT_PRIORITY         [dependent of processor]
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    [dependent on processor and application]
-#define configMAX_API_CALL_INTERRUPT_PRIORITY   [dependent on processor and application]
-*/
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY    6
-//#define portCRITICAL_NESTING_IN_TCB				1
+#define configKERNEL_INTERRUPT_PRIORITY         1
+#define configMAX_SYSCALL_INTERRUPT_PRIORITY    7
 
 /* Define to trap errors during development. */
 #define configASSERT( x ) if( ( x ) == 0 ) {taskDISABLE_INTERRUPTS(); for( ;; );}
