@@ -12,7 +12,7 @@
     "type": "git",
     "url": "https://github.com/Nuclei-Software/platform-nuclei.git"
   },
-  "version": "1.0.3",
+  "version": "1.0.3-dev",
   "packageRepositories": [
     "https://dl.bintray.com/platformio/dl-packages/manifest.json",
     "http://dl.platformio.org/packages/manifest.json",
@@ -32,7 +32,7 @@
     "framework-nuclei-sdk": {
       "optional": true,
       "type": "framework",
-      "version": "~0.2.2"
+      "version": "~0.2.3"
     },
     "tool-openocd-nuclei": {
       "optional": true,

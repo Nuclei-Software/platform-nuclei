@@ -371,10 +371,6 @@
 #define structassign(d, s)      d = s
 #endif
 
-#ifndef ITERATIONS
-#define ITERATIONS              200000
-#endif
-
 #ifdef  NOENUM
 #define Ident_1 0
 #define Ident_2 1

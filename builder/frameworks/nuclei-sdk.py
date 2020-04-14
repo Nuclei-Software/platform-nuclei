@@ -59,7 +59,7 @@ def get_extra_soc_board_incdirs(soc, board):
 
 
 def select_rtos_package(build_rtos):
-    SUPPORTED_RTOSES = ("FreeRTOS", "UCOSII")
+    SUPPORTED_RTOSES = ("FreeRTOS", "UCOSII", "RTThread")
     selected_rtos = None
     build_rtos = build_rtos.strip().lower()
     for rtos in SUPPORTED_RTOSES:
@@ -141,6 +141,11 @@ else:
 # Use correct downloaded modes
 DOWNLOAD_MODE = "DOWNLOAD_MODE_%s" % build_download_mode.upper()
 
+if selected_rtos:
+    RTOS_MACRO = ("RTOS_%s" % selected_rtos.upper())
+else:
+    RTOS_MACRO = ()
+
 default_arch_abi = ("rv32imac", "ilp32")
 
 if not build_mabi and not build_march and build_core in core_arch_abis:
@@ -180,7 +185,8 @@ env.Append(
     ],
 
     CPPDEFINES=[
-        ("DOWNLOAD_MODE", DOWNLOAD_MODE)
+        ("DOWNLOAD_MODE", DOWNLOAD_MODE),
+        RTOS_MACRO
     ],
 
     CPPPATH=[
@@ -252,6 +258,18 @@ elif selected_rtos == "UCOSII":
             join(FRAMEWORK_DIR, "OS", "UCOSII", "arch"),
             join(FRAMEWORK_DIR, "OS", "UCOSII", "cfg"),
             join(FRAMEWORK_DIR, "OS", "UCOSII", "source")
+        ]
+    )
+elif selected_rtos == "RTThread":
+    libs.append(env.BuildLibrary(
+        join("$BUILD_DIR", "RTOS", "RTThread"),
+        join(FRAMEWORK_DIR, "OS", "RTThread")
+    ))
+    env.Append(
+        CPPPATH=[
+            join(FRAMEWORK_DIR, "OS", "RTThread", "libcpu", "risc-v", "nuclei"),
+            join(FRAMEWORK_DIR, "OS", "RTThread", "include"),
+            join(FRAMEWORK_DIR, "OS", "RTThread", "include", "libc")
         ]
     )
 
