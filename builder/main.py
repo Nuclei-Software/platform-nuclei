@@ -140,6 +140,7 @@ if upload_protocol.startswith("jlink"):
     upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
 
 elif upload_protocol in debug_tools:
+    upload_target = target_hex
     openocd_args = [
         "-c",
         "debug_level %d" % (2 if int(ARGUMENTS.get("PIOVERBOSE", 0)) else 1)
