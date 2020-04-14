@@ -29,10 +29,10 @@ How to build PlatformIO based project
     > platformio run --target upload
 
     # Build specific environment
-    > platformio run -e gd32vf103v_rvstar
+    > platformio run -e nuclei-gd32vf103v_rvstar
 
     # Upload firmware for the specific environment
-    > platformio run -e gd32vf103v_rvstar --target upload
+    > platformio run -e nuclei-gd32vf103v_rvstar --target upload
 
     # Clean build files
     > platformio run --target clean
