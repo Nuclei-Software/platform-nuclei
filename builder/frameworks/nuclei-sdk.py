@@ -144,7 +144,7 @@ DOWNLOAD_MODE = "DOWNLOAD_MODE_%s" % build_download_mode.upper()
 if selected_rtos:
     RTOS_MACRO = ("RTOS_%s" % selected_rtos.upper())
 else:
-    RTOS_MACRO = ()
+    RTOS_MACRO = ("NO_RTOS_SERVICE")
 
 default_arch_abi = ("rv32imac", "ilp32")
 
