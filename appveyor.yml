@@ -11,6 +11,7 @@ environment:
     - PLATFORMIO_PROJECT_DIR: "examples/demo_dsp"
     - PLATFORMIO_PROJECT_DIR: "examples/freertos_demo"
     - PLATFORMIO_PROJECT_DIR: "examples/ucosii_demo"
+    - PLATFORMIO_PROJECT_DIR: "examples/rtthread_demo"
 
 install:
 - cmd: git submodule update --init --recursive
