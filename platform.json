@@ -2,8 +2,7 @@
   "name": "nuclei",
   "title": "Nuclei",
   "description": "Find professional RISC-V Processor IP in Nuclei, first professional RISC-V IP company in Mainland China, match all your requirements in AIoT Era.",
-  "url": "https://nucleisys.com/",
-  "homepage": "http://platformio.org/platforms/nuclei",
+  "homepage": "https://nucleisys.com/",
   "license": "Apache-2.0",
   "engines": {
     "platformio": ">3"
