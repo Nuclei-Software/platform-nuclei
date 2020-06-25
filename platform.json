@@ -22,7 +22,7 @@
       "package": "framework-nuclei-sdk",
       "script": "builder/frameworks/nuclei-sdk.py",
       "description": "Open Source Software Development Kit for the Nuclei N/NX processors",
-      "url": "https://github.com/Nuclei-Software/nuclei-sdk",
+      "homepage": "https://github.com/Nuclei-Software/nuclei-sdk",
       "title": "Nuclei SDK"
     }
   },
