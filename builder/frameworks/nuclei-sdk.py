@@ -92,7 +92,7 @@ if not build_soc:
         "build.soc is not defined in board description json file, please check!")
     env.Exit(1)
 
-BUILTIN_ALL_DOWNLOADED_MODES = ("ilm", "flash", "flashxip")
+BUILTIN_ALL_DOWNLOADED_MODES = ("ilm", "flash", "flashxip", "ddr")
 
 build_core = board.get("build.core", "").lower().strip()
 build_mabi = board.get("build.mabi", "").lower().strip()
