@@ -147,10 +147,11 @@ elif upload_protocol in debug_tools:
     ]
     openocd_args.extend(
         debug_tools.get(upload_protocol).get("server").get("arguments", []))
-    if download_mode == "ilm":
+    if download_mode in ("ilm", "ddr"):
+        startplace = download_mode + "_start"
         openocd_args.extend([
             "-c", "reset halt; load_image {$SOURCE};  resume %s; shutdown;" %
-            board_config.get("upload").get("ilm_start", "")
+            board_config.get("upload").get(startplace, "")
         ])
     else:
         openocd_args.extend([

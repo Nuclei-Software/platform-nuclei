@@ -15,7 +15,8 @@
     "download_modes": [
       "ilm",
       "flash",
-      "flashxip"
+      "flashxip",
+      "ddr"
     ]
   },
   "debug": {
@@ -33,6 +34,7 @@
     "maximum_ram_size": 65536,
     "maximum_size": 65536,
     "ilm_start": "0x80000000",
+    "ddr_start": "0xA0000000",
     "flash_start": "0x20000000",
     "protocol": "rv-link",
     "protocols": [
