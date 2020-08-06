@@ -11,7 +11,7 @@
     "type": "git",
     "url": "https://github.com/Nuclei-Software/platform-nuclei.git"
   },
-  "version": "1.0.6",
+  "version": "1.0.7",
   "packageRepositories": [
     "https://dl.bintray.com/platformio/dl-packages/manifest.json",
     "http://dl.platformio.org/packages/manifest.json",
@@ -29,17 +29,17 @@
   "packages": {
     "toolchain-riscv-gcc-nuclei": {
       "type": "toolchain",
-      "version": "~9.2.0"
+      "version": "~9.2.1"
     },
     "framework-nuclei-sdk": {
       "optional": true,
       "type": "framework",
-      "version": "~0.2.4"
+      "version": "~0.2.5"
     },
     "tool-openocd-nuclei": {
       "optional": true,
       "type": "uploader",
-      "version": "~0.10.0"
+      "version": "~0.10.1"
     },
     "tool-jlink": {
       "type": "uploader",
