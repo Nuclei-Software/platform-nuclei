@@ -3,6 +3,12 @@
   "title": "Nuclei",
   "description": "Find professional RISC-V Processor IP in Nuclei, first professional RISC-V IP company in Mainland China, match all your requirements in AIoT Era.",
   "homepage": "https://nucleisys.com/",
+  "keywords": [
+    "dev-platform",
+    "Nuclei",
+    "RISC-V",
+    "AIoT"
+  ],
   "license": "Apache-2.0",
   "engines": {
     "platformio": ">3"
