@@ -35,21 +35,25 @@
   "packages": {
     "toolchain-riscv-gcc-nuclei": {
       "type": "toolchain",
+      "owner": "platformio",
       "version": "~9.2.1"
     },
     "framework-nuclei-sdk": {
       "optional": true,
       "type": "framework",
+      "owner": "platformio",
       "version": "~0.2.5"
     },
     "tool-openocd-nuclei": {
       "optional": true,
       "type": "uploader",
+      "owner": "platformio",
       "version": "~0.10.1"
     },
     "tool-jlink": {
       "type": "uploader",
       "optional": true,
+      "owner": "platformio",
       "version": "^1.65200.0"
     }
   }
