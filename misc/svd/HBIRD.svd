@@ -6539,7 +6539,7 @@
       </peripheral> 
 
     <peripheral>
-      <name>TIMER</name>
+      <name>MTIMER</name>
       <description>System Timer.</description>
       <baseAddress>0x02000000</baseAddress>
       <groupName>TIMER</groupName>
@@ -6555,34 +6555,42 @@
       <registers>
 
         <register>
-          <name>MSIP</name>
-          <description>Machine Software Interrupt Pending Register.</description>
-          <addressOffset>0x0000</addressOffset>
+          <name>MTIME_LO</name>
+          <description>Machine Timer Register Low.</description>
+          <addressOffset>0x0</addressOffset>
+        </register><register>
+          <name>MTIME_HI</name>
+          <description>Machine Timer Register High.</description>
+          <addressOffset>0x4</addressOffset>
         </register>
 
         <register>
           <name>MTIMECMP_LO</name>
           <description>Machine Timer Compare Register Low.</description>
-          <addressOffset>0x4000</addressOffset>
+          <addressOffset>0x8</addressOffset>
         </register>
 
         <register>
           <name>MTIMECMP_HI</name>
           <description>Machine Timer Compare Register High.</description>
-          <addressOffset>0x4004</addressOffset>
+          <addressOffset>0xC</addressOffset>
+        </register><register>
+          <name>MSFTRST</name>
+          <description>Machine Timer Software Core Reset Register.</description>
+          <addressOffset>0xFF0</addressOffset>
+        </register><register>
+          <name>MIMECTL</name>
+          <description>Machine Timer Control Register.</description>
+          <addressOffset>0xFF8</addressOffset>
+        </register><register>
+          <name>MSIP</name>
+          <description>Machine Software Interrupt Pending Register.</description>
+          <addressOffset>0xFFC</addressOffset>
         </register>
 
-        <register>
-          <name>MTIME_LO</name>
-          <description>Machine Timer Register Low.</description>
-          <addressOffset>0xBFF8</addressOffset>
-        </register>
+        
 
-        <register>
-          <name>MTIME_HI</name>
-          <description>Machine Timer Register High.</description>
-          <addressOffset>0xBFFC</addressOffset>
-        </register>
+        
 
       </registers>
     </peripheral> <!-- TIMER -->
