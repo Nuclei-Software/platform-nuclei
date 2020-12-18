@@ -209,7 +209,7 @@ int main()
     long xtra = 1;
     long x100 = 100;
 
-#if CFG_SIMU
+#if CFG_SIMULATION
     int duration = 1;
 #else
     int duration = 10;
@@ -275,7 +275,7 @@ int main()
 
     printf("\nMWIPS/MHz        ");
 
-    printf("%39.3f%19.3f\n\n", mwips / get_cpu_freq() * 1000000, TimeUsed);
+    printf("%39.3f%19.3f\n\n", mwips / SystemCoreClock * 1000000, TimeUsed);
     if (Check == 0)
         printf("Wrong answer  ");
 
