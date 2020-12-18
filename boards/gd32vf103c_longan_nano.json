@@ -1,0 +1,42 @@
+{
+  "build": {
+    "f_cpu": "108000000L",
+    "hwids": [
+      [
+        "0x0403",
+        "0x6010"
+      ]
+    ],
+    "mabi": "ilp32",
+    "march": "rv32imac",
+    "mcmodel": "medlow",
+    "soc": "gd32vf103",
+    "mcu": "gd32vf103cbt6",
+    "download": "flashxip",
+    "download_modes": [
+      "flashxip"
+    ]
+  },
+  "debug": {
+    "jlink_device": "GD32VF103CBT6",
+    "svd_path": "GD32VF103.svd"
+  },
+  "frameworks": [
+    "nuclei-sdk"
+  ],
+  "name": "Sipeed Longan Nano",
+  "upload": {
+    "maximum_ram_size": 32768,
+    "maximum_size": 131072,
+    "flash_start": "0x08000000",
+    "protocol": "rv-link",
+    "protocols": [
+      "altera-usb-blaster",
+      "gd-link",
+      "jlink",
+      "rv-link"
+    ]
+  },
+  "url": "https://www.gigadevice.com/",
+  "vendor": "GigaDevice"
+}

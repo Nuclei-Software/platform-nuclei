@@ -11,7 +11,7 @@
     "soc": "hbird",
     "mcu": "HummingBird",
     "core": "n307fd",
-    "download": "flash",
+    "download": "ilm",
     "download_modes": [
       "ilm",
       "flash",
