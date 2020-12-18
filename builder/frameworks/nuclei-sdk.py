@@ -99,6 +99,8 @@ build_mabi = board.get("build.mabi", "").lower().strip()
 build_march = board.get("build.march", "").lower().strip()
 build_mcmodel = board.get("build.mcmodel", "medany").lower().strip()
 build_rtos = board.get("build.rtos", "").lower().strip()
+build_rtthread_msh = board.get("build.rtthread_msh", "").lower().strip()
+build_variant = board.get("build.variant", "").lower().strip()
 
 selected_rtos = select_rtos_package(build_rtos)
 
@@ -130,8 +132,15 @@ print("Supported downloaded modes for board %s are %s, chosen downloaded mode is
     % (build_board, mixed_supported_download_modes, build_download_mode))
 
 if not board.get("build.ldscript", ""):
+    build_soc_variant = build_soc
+    if build_board == "gd32vf103c_longan_nano":
+        if build_variant == "lite":
+            build_soc_variant = "gd32vf103x8"
+        else:
+            build_soc_variant = "gd32vf103xb"
+
     ld_script = "gcc_%s_%s.ld" % (
-        build_soc, build_download_mode) if build_download_mode else "gcc_%s.ld" % build_soc
+        build_soc_variant, build_download_mode) if build_download_mode else "gcc_%s.ld" % build_soc
     build_ldscript = join(
         FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Source", "GCC", ld_script)
     env.Replace(LDSCRIPT_PATH=build_ldscript)
@@ -155,6 +164,10 @@ else:
         build_march, build_mabi = default_arch_abi
         print("No mabi and march specified in board json file, use default -march=%s -mabi=%s!" % (build_march, build_mabi))
 
+if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
+    rtt_srcfilter = "+<*>"
+else:
+    rtt_srcfilter = "+<*> -<components/>"
 
 env.SConscript("_bare.py", exports="env")
 
@@ -206,7 +219,7 @@ env.Append(
         join(FRAMEWORK_DIR, "NMSIS", "Library", "NN", "GCC")
     ],
 
-    LIBS=["gcc", "m"]
+    LIBS=["gcc", "m", "stdc++"]
 )
 
 extra_incdirs = get_extra_soc_board_incdirs(build_soc, build_board)
@@ -263,13 +276,15 @@ elif selected_rtos == "UCOSII":
 elif selected_rtos == "RTThread":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "RTThread"),
-        join(FRAMEWORK_DIR, "OS", "RTThread")
+        join(FRAMEWORK_DIR, "OS", "RTThread"),
+        src_filter=rtt_srcfilter
     ))
     env.Append(
         CPPPATH=[
             join(FRAMEWORK_DIR, "OS", "RTThread", "libcpu", "risc-v", "nuclei"),
             join(FRAMEWORK_DIR, "OS", "RTThread", "include"),
-            join(FRAMEWORK_DIR, "OS", "RTThread", "include", "libc")
+            join(FRAMEWORK_DIR, "OS", "RTThread", "include", "libc"),
+            join(FRAMEWORK_DIR, "OS", "RTThread", "components", "finsh")
         ]
     )
 
