@@ -26,18 +26,19 @@ env.Append(
         "-Os",
         "-Wall",  # show warnings
         "-ffunction-sections",
-        "-fdata-sections"
+        "-fdata-sections",
+        "-fno-common"
     ],
 
     LINKFLAGS=[
         "-Os",
-        "-nostartfiles",
-        "--specs=nano.specs",
-        "--specs=nosys.specs",
+        "-ffunction-sections",
+        "-fdata-sections",
+        "-fno-common",
         "-Wl,--gc-sections"
     ],
 
-    LIBS=["c"],
+    LIBS=[],
 )
 
 # copy CCFLAGS to ASFLAGS (-x assembler-with-cpp mode)

@@ -171,6 +171,8 @@ else:
 
 env.SConscript("_bare.py", exports="env")
 
+target_map = join("$BUILD_DIR", "${PROGNAME}.map")
+
 env.Append(
     CCFLAGS=[
         "-march=%s" % build_march,
@@ -188,6 +190,10 @@ env.Append(
         "-march=%s" % build_march,
         "-mabi=%s" % build_mabi,
         "-mcmodel=%s" % build_mcmodel,
+        "-Wl,-Map,%s" % target_map,
+        "-nostartfiles",
+        "--specs=nano.specs",
+        "--specs=nosys.specs",
         "-u", "_isatty",
         "-u", "_write",
         "-u", "_sbrk",
@@ -214,13 +220,17 @@ env.Append(
     ],
 
     LIBPATH=[
-        "$BUILD_DIR",
         join(FRAMEWORK_DIR, "NMSIS", "Library", "DSP", "GCC"),
         join(FRAMEWORK_DIR, "NMSIS", "Library", "NN", "GCC")
     ],
 
     LIBS=["gcc", "m", "stdc++"]
 )
+
+# WORKAROUND: If RT-Thread used, force it to include symbols from finsh
+# otherwise it will not be included
+if build_rtthread_msh == "1":
+    env.Append(LINKFLAGS=["-u", "finsh_system_init"])
 
 extra_incdirs = get_extra_soc_board_incdirs(build_soc, build_board)
 if extra_incdirs:
@@ -235,20 +245,20 @@ if not is_valid_soc(build_soc):
 #
 # Target: Build Nuclei SDK Libraries
 #
-
+soclibname = "soc_" + build_soc
+boardlibname = "board_" + build_board
 libs = [
     env.BuildLibrary(
-        join("$BUILD_DIR", "SoC", build_soc, "Common"),
+        join("$BUILD_DIR", "SoC", build_soc, soclibname),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Common")
     ),
 
     env.BuildLibrary(
-        join("$BUILD_DIR", "SoC", build_soc, "Board", build_board),
+        join("$BUILD_DIR", "SoC", build_soc, "Board", boardlibname),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board)
     )
 ]
 
-rtoslibs = []
 if selected_rtos == "FreeRTOS":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "FreeRTOS"),

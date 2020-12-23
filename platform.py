@@ -63,7 +63,7 @@ class NucleiPlatform(PlatformBase):
                     board_cfg = join(
                         sdk_dir, "SoC", build_soc, "Board", build_board, "openocd.cfg",
                     )
-                server_args = ["-f", board_cfg]
+                server_args = ["-c", "debug_level 1", "-f", board_cfg]
                 debug["tools"]["rv-link"] = {
                     "hwids": [["0x28e9", "0x018a"]],
                     "require_debug_port": True,
@@ -142,7 +142,8 @@ class NucleiPlatform(PlatformBase):
                         "   monitor halt",
                         "end",
                         "define pio_reset_run_target",
-                        "   monitor reset",
+                        "   monitor halt",
+                        "   monitor resume",
                         "end",
                         "target extended-remote $DEBUG_PORT",
                         "$LOAD_CMDS",
