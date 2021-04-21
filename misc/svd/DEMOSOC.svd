@@ -2,10 +2,10 @@
 <device schemaVersion="1.1" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD_Schema_1_0.xsd" >
   <vendor>Nuclei</vendor>
   <vendorID>Nuclei</vendorID>
-  <name>hbird</name>
-  <series>HummingBird Evaluation SoC</series>
+  <name>demosoc</name>
+  <series>Nuclei Evaluation Demo SoC</series>
   <version></version>
-  <description>HummingBird Evaluation SoC using Nuclei N/NX Core
+  <description>Nuclei Evaluation Demo SoC using Nuclei N/NX Core
   </description>
 
   <addressUnitBits>8</addressUnitBits>
@@ -15,7 +15,7 @@
   <resetMask>0xFFFFFFFF</resetMask>
 
   <cpu>
-    <name>HBird</name>
+    <name>Demosoc</name>
     <endian>little</endian>
   </cpu>
 
