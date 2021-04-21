@@ -92,6 +92,10 @@ if not build_soc:
         "build.soc is not defined in board description json file, please check!")
     env.Exit(1)
 
+if build_soc == "hbird":
+    print("%s SoC is deprecated, please use demosoc instead!" %(build_soc))
+    build_soc = "demosoc"
+
 BUILTIN_ALL_DOWNLOADED_MODES = ("ilm", "flash", "flashxip", "ddr")
 
 build_core = board.get("build.core", "").lower().strip()
@@ -114,9 +118,9 @@ build_supported_download_modes = [mode.lower().strip() for mode in build_support
 mixed_supported_download_modes = list(set(BUILTIN_ALL_DOWNLOADED_MODES).intersection(
     build_supported_download_modes))
 
-if build_soc == "hbird":
+if build_soc == "demosoc":
     if build_download_mode not in mixed_supported_download_modes:
-        # If build.download not defined for hbird SoC, use default "ILM"
+        # If build.download not defined for Nuclei demosoc SoC, use default "ILM"
         chosen_download_mode = "ilm" if len(mixed_supported_download_modes) == 0 else mixed_supported_download_modes[0]
         print("Download mode %s is not supported for SOC %s, use default download mode %s" \
              % (build_download_mode, build_soc, chosen_download_mode))
