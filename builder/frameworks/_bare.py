@@ -22,6 +22,9 @@ from SCons.Script import Import
 Import("env")
 
 env.Append(
+    ASPPFLAGS=[
+        "-x", "assembler-with-cpp",
+    ],
     CCFLAGS=[
         "-Os",
         "-Wall",  # show warnings
@@ -40,6 +43,3 @@ env.Append(
 
     LIBS=[],
 )
-
-# copy CCFLAGS to ASFLAGS (-x assembler-with-cpp mode)
-env.Append(ASFLAGS=env.get("CCFLAGS", [])[:])

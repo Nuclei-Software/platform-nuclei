@@ -16,7 +16,7 @@
 from os.path import isfile, join
 from platform import system
 
-from platformio.managers.platform import PlatformBase
+from platformio.public import PlatformBase
 
 
 class NucleiPlatform(PlatformBase):
