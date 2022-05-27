@@ -1,4 +1,4 @@
-# Nuclei: development platform for [PlatformIO](http://platformio.org)
+# Nuclei: development platform for [PlatformIO](https://platformio.org)
 [![Build Status](https://travis-ci.com/Nuclei-Software/platform-nuclei.svg?branch=master)](https://travis-ci.com/Nuclei-Software/platform-nuclei)
 [![Build status](https://ci.appveyor.com/api/projects/status/cy7mc2qbd5yalr41?svg=true)](https://ci.appveyor.com/project/fanghuaqi/platform-nuclei)
 
@@ -9,12 +9,12 @@ first mass production general-purpose MCU based on RISC-V together with GigaDevi
 see https://www.gigadevice.com/products/microcontrollers/gd32/risc-v/, and is also
 the RISC-V eco-system leader in Mainland China.
 
-* [Home](http://platformio.org/platforms/nuclei) (home page in PlatformIO Platform Registry)
+* [Home](https://platformio.org/platforms/nuclei) (home page in PlatformIO Platform Registry)
 * [Documentation](http://docs.platformio.org/page/platforms/nuclei.html) (advanced usage, packages, boards, frameworks, etc.)
 
 # Usage
 
-1. [Install PlatformIO](http://platformio.org)
+1. [Install PlatformIO](https://platformio.org)
 2. Create PlatformIO project and configure a platform option in [platformio.ini](http://docs.platformio.org/page/projectconf.html) file:
 
 ## Stable version
