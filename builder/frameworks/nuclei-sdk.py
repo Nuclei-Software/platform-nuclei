@@ -278,7 +278,7 @@ libs = [
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, soclibname),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Common"),
-        src_filter="+<*> -<**/IAR/> -<**/iardlib/> -<**/libncrt/>"
+        src_filter="+<*> -<**/IAR/> -<**/iardlib/> -<**/libncrt/> -<**/Usb/>"
     ),
 
     env.BuildLibrary(
