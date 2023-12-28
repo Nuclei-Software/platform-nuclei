@@ -72,14 +72,14 @@ def parse_nuclei_soc_predefined_cores(core_mk):
     if not os.path.isfile(core_mk):
         return dict()
     core_arch_abis = dict()
-    core_arch_abi_re = re.compile(r'^([A-Z]+\d+[A-Z]*)_CORE_ARCH_ABI\s*=\s*(rv\d+\w*)\s+(i*lp\d+\w*)')
+    core_arch_abi_re = re.compile(r'^([A-Z]+\d+[A-Z]*)_CORE_ARCH_ABI\s*=\s*(rv\d+\w*)\s+(i*lp\d+\w*)\s+(nuclei-\d*-series)')
     with open(core_mk, "r") as core_mk_file:
         for line in core_mk_file.readlines():
             line = line.strip()
             matches = core_arch_abi_re.match(line)
             if matches:
                 core_lower = matches.groups()[0].lower()
-                core_arch_abis[core_lower] = (matches.groups()[1:3])
+                core_arch_abis[core_lower] = (matches.groups()[1:])
     return core_arch_abis
 
 
@@ -96,12 +96,15 @@ if build_soc == "hbird":
     print("%s SoC is deprecated, please use demosoc instead!" %(build_soc))
     build_soc = "demosoc"
 
-BUILTIN_ALL_DOWNLOADED_MODES = ("ilm", "flash", "flashxip", "ddr")
+BUILTIN_ALL_DOWNLOADED_MODES = ("ilm", "flash", "flashxip", "ddr", "sram", "sramxip")
 
 build_core = board.get("build.core", "").lower().strip()
-build_mabi = board.get("build.mabi", "").lower().strip()
+build_arch_ext = board.get("build.arch_ext", "").lower().strip()
 build_march = board.get("build.march", "").lower().strip()
-build_mcmodel = board.get("build.mcmodel", "medany").lower().strip()
+build_mabi = board.get("build.mabi", "").lower().strip()
+build_mtune = board.get("build.mtune", "").lower().strip()
+build_mcmodel = board.get("build.mcmodel", "").lower().strip()
+
 build_rtos = board.get("build.rtos", "").lower().strip()
 build_rtthread_msh = board.get("build.rtthread_msh", "").lower().strip()
 build_variant = board.get("build.variant", "").lower().strip()
@@ -118,7 +121,7 @@ build_supported_download_modes = [mode.lower().strip() for mode in build_support
 mixed_supported_download_modes = list(set(BUILTIN_ALL_DOWNLOADED_MODES).intersection(
     build_supported_download_modes))
 
-if build_soc == "demosoc":
+if build_soc == "evalsoc":
     if build_download_mode not in mixed_supported_download_modes:
         # If build.download not defined for Nuclei demosoc SoC, use default "ILM"
         chosen_download_mode = "ilm" if len(mixed_supported_download_modes) == 0 else mixed_supported_download_modes[0]
@@ -162,53 +165,72 @@ else:
 default_arch_abi = ("rv32imac", "ilp32")
 
 if not build_mabi and not build_march and build_core in core_arch_abis:
-    build_march, build_mabi = core_arch_abis[build_core]
+    if len(core_arch_abis[build_core]) == 2:
+        build_march, build_mabi = core_arch_abis[build_core]
+    elif len(core_arch_abis[build_core]) == 3:
+        build_march, build_mabi, build_mtune = core_arch_abis[build_core]
 else:
     if not build_mabi or not build_march:
         build_march, build_mabi = default_arch_abi
         print("No mabi and march specified in board json file, use default -march=%s -mabi=%s!" % (build_march, build_mabi))
 
 if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
-    rtt_srcfilter = "+<*>"
+    rtt_srcfilter = "+<*> -<**/iar/>"
 else:
-    rtt_srcfilter = "+<*> -<components/>"
+    rtt_srcfilter = "+<*> -<**/iar/> -<components/>"
 
 env.SConscript("_bare.py", exports="env")
 
 target_map = join("$BUILD_DIR", "${PROGNAME}.map")
 
+build_mtune_opt = ""
+if build_mtune != "":
+    build_mtune_opt = "-mtune=%s" % build_mtune
+if build_mcmodel == "":
+    if "rv32" in build_march:
+        build_mcmodel = "medlow"
+    else:
+        build_mcmodel = "medany"
+
+build_march = "%s%s" % (build_march, build_arch_ext)
+
 env.Append(
     CCFLAGS=[
         "-march=%s" % build_march,
         "-mabi=%s" % build_mabi,
-        "-mcmodel=%s" % build_mcmodel
+        "-mcmodel=%s" % build_mcmodel,
+        "%s" % build_mtune_opt
     ],
 
     ASFLAGS=[
         "-march=%s" % build_march,
         "-mabi=%s" % build_mabi,
-        "-mcmodel=%s" % build_mcmodel
+        "-mcmodel=%s" % build_mcmodel,
+        "%s" % build_mtune_opt
     ],
 
     LINKFLAGS=[
         "-march=%s" % build_march,
         "-mabi=%s" % build_mabi,
         "-mcmodel=%s" % build_mcmodel,
+        "%s" % build_mtune_opt,
         "-Wl,-Map,%s" % target_map,
         "-nostartfiles",
         "--specs=nano.specs",
-        "--specs=nosys.specs",
         "-u", "_isatty",
         "-u", "_write",
         "-u", "_sbrk",
         "-u", "_read",
         "-u", "_close",
         "-u", "_fstat",
-        "-u", "_lseek"
+        "-u", "_lseek",
+        "-u", "errno"
     ],
 
     CPPDEFINES=[
         ("DOWNLOAD_MODE", DOWNLOAD_MODE),
+        ("DOWNLOAD_MODE_STRING", "\\\"%s\\\"" % build_download_mode),
+        ("VECTOR_TABLE_REMAPPED") if build_download_mode == "flash" else ("VECTOR_TABLE_NOT_REMAPPED"),
         RTOS_MACRO
     ],
 
@@ -218,6 +240,7 @@ env.Append(
         join(FRAMEWORK_DIR, "NMSIS", "Include"),
         join(FRAMEWORK_DIR, "NMSIS", "Core", "Include"),
         join(FRAMEWORK_DIR, "NMSIS", "DSP", "Include"),
+        join(FRAMEWORK_DIR, "NMSIS", "DSP", "PrivateInclude"),
         join(FRAMEWORK_DIR, "NMSIS", "NN", "Include"),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include"),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Include"),
@@ -254,12 +277,14 @@ boardlibname = "board_" + build_board
 libs = [
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, soclibname),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Common")
+        join(FRAMEWORK_DIR, "SoC", build_soc, "Common"),
+        src_filter="+<*> -<**/IAR/> -<**/iardlib/> -<**/libncrt/>"
     ),
 
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, "Board", boardlibname),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board)
+        join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board),
+        src_filter="+<*> -<**/IAR/>"
     )
 ]
 
@@ -267,18 +292,19 @@ if selected_rtos == "FreeRTOS":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "FreeRTOS"),
         join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source"),
-        src_filter="+<*> -<portable/MemMang/> +<portable/MemMang/heap_4.c>"
+        src_filter="+<*> -<portable/MemMang/> -<portable/IAR/> +<portable/MemMang/heap_4.c>"
     ))
     env.Append(
         CPPPATH=[
             join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "include"),
-            join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "portable", "GCC")
+            join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "portable")
         ]
     )
 elif selected_rtos == "UCOSII":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "UCOSII"),
-        join(FRAMEWORK_DIR, "OS", "UCOSII")
+        join(FRAMEWORK_DIR, "OS", "UCOSII"),
+        src_filter="+<*> -<arch/iar/>"
     ))
     env.Append(
         CPPPATH=[

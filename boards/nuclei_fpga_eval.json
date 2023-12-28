@@ -7,21 +7,25 @@
         "0x6010"
       ]
     ],
-    "mcmodel": "medany",
-    "soc": "demosoc",
-    "mcu": "demosoc",
+    "soc": "evalsoc",
+    "mcu": "evalsoc",
     "core": "n307fd",
+    "arch_ext": "",
     "download": "ilm",
+    "toolchain": "nuclei_gnu",
+    "stdclib": "newlib_small",
+    "ldscript": "",
     "download_modes": [
       "ilm",
       "flash",
       "flashxip",
+      "sram",
       "ddr"
     ]
   },
   "debug": {
     "jlink_device": "RISC-V",
-    "svd_path": "DEMOSOC.svd",
+    "svd_path": "EVALSOC.svd",
     "onboard_tools": [
       "rv-link"
     ]
@@ -29,16 +33,18 @@
   "frameworks": [
     "nuclei-sdk"
   ],
-  "name": "Nuclei FPGA Evaluation Kit(MCU200T/DDR200T)",
+  "name": "Nuclei FPGA Evaluation Kit",
   "upload": {
     "maximum_ram_size": 65536,
     "maximum_size": 65536,
     "ilm_start": "0x80000000",
     "ddr_start": "0xA0000000",
+    "sram_start": "0xA0000000",
     "flash_start": "0x20000000",
     "protocol": "rv-link",
     "protocols": [
-      "rv-link"
+      "rv-link",
+      "jlink"
     ]
   },
   "url": "https://nucleisys.com/",

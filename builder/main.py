@@ -27,14 +27,14 @@ platform = env.PioPlatform()
 board_config = env.BoardConfig()
 
 env.Replace(
-    AR="riscv-nuclei-elf-gcc-ar",
-    AS="riscv-nuclei-elf-as",
-    CC="riscv-nuclei-elf-gcc",
-    GDB="riscv-nuclei-elf-gdb",
-    CXX="riscv-nuclei-elf-g++",
-    OBJCOPY="riscv-nuclei-elf-objcopy",
-    RANLIB="riscv-nuclei-elf-gcc-ranlib",
-    SIZETOOL="riscv-nuclei-elf-size",
+    AR="riscv64-unknown-elf-gcc-ar",
+    AS="riscv64-unknown-elf-as",
+    CC="riscv64-unknown-elf-gcc",
+    GDB="riscv64-unknown-elf-gdb",
+    CXX="riscv64-unknown-elf-g++",
+    OBJCOPY="riscv64-unknown-elf-objcopy",
+    RANLIB="riscv64-unknown-elf-gcc-ranlib",
+    SIZETOOL="riscv64-unknown-elf-size",
 
     ARFLAGS=["rc"],
 
@@ -148,7 +148,7 @@ elif upload_protocol in debug_tools:
     ]
     openocd_args.extend(
         debug_tools.get(upload_protocol).get("server").get("arguments", []))
-    if download_mode in ("ilm", "ddr"):
+    if download_mode in ("ilm", "ddr", "sram", "sramxip"):
         startplace = download_mode + "_start"
         openocd_args.extend([
             "-c", "reset halt; load_image {$SOURCE};  resume %s; shutdown;" %
@@ -156,8 +156,8 @@ elif upload_protocol in debug_tools:
         ])
     else:
         openocd_args.extend([
-            "-c", "reset halt; flash protect 0 0 last off;",
-            "-c", "program {$SOURCE} verify; reset; shutdown;"
+            "-c", "reset halt; ",
+            "-c", "program {$SOURCE} verify; reset halt; resume; shutdown;"
         ])
     env.Replace(
         UPLOADER="openocd",

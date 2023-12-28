@@ -11,12 +11,15 @@
 #define HIGHER_INTLEVEL         2
 #define LOWER_INTLEVEL          1
 
-#define TIMER_TICKS             (2 * SOC_TIMER_FREQ)
+// 100ms
+#define TIMER_TICKS             (SOC_TIMER_FREQ / 10)
+
+static volatile uint32_t int_check_cnt = 0;
 
 // setup timer
 void setup_timer(void)
 {
-    printf("Initialize timer and start timer interrupt periodly\n\r");
+    printf("Initialize timer and start timer interrupt periodically\n\r");
     SysTick_Config(TIMER_TICKS);
 }
 
@@ -57,10 +60,12 @@ __INTERRUPT void eclic_msip_handler(void)
     printf("[IN SOFTWARE INTERRUPT]software interrupt hit %d times\r\n", int_sw_cnt++);
     printf("[IN SOFTWARE INTERRUPT]software interrupt end\r\n");
 
+    int_check_cnt ++;
     // restore CSR context
     RESTORE_IRQ_CSR_CONTEXT();
 }
 
+#define RUN_LOOPS   20
 int main(int argc, char** argv)
 {
     uint8_t timer_intlevel, swirq_intlevel;
@@ -81,17 +86,19 @@ int main(int argc, char** argv)
 
     // initialize software interrupt as vector interrupt
     returnCode = ECLIC_Register_IRQ(SysTimerSW_IRQn, ECLIC_VECTOR_INTERRUPT,
-                                    ECLIC_LEVEL_TRIGGER, swirq_intlevel, 0, eclic_msip_handler);
+                                    ECLIC_LEVEL_TRIGGER, swirq_intlevel, 0, (void*)eclic_msip_handler);
 
     // inital timer interrupt as non-vector interrupt
     returnCode = ECLIC_Register_IRQ(SysTimer_IRQn, ECLIC_NON_VECTOR_INTERRUPT,
-                                    ECLIC_LEVEL_TRIGGER, timer_intlevel, 0, eclic_mtip_handler);
+                                    ECLIC_LEVEL_TRIGGER, timer_intlevel, 0, (void*)eclic_mtip_handler);
 
     // Enable interrupts in general.
     __enable_irq();
 
     // Wait for timer interrupt and software interrupt
-    // triggered periodly
-    while (1);
+    // triggered periodically
+    while (int_check_cnt < RUN_LOOPS);
+    __disable_irq();
+    printf("ECLIC Demo finished sucessfully in %d loops\n", RUN_LOOPS);
     return 0;
 }
