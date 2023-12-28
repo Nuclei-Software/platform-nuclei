@@ -133,21 +133,29 @@ class NucleiPlatform(PlatformBase):
             if link != "jlink":
                 debug["tools"][link] = {
                     "server": {
-                        "package": "tool-openocd-nuclei",
+                        "package": "tool-openocd-gd32",
                         "executable": "bin/openocd",
                         "arguments": server_args,
                     },
                     "init_cmds": [
                         "define pio_reset_halt_target",
-                        "   monitor halt",
+                        "   monitor reset halt",
                         "end",
                         "define pio_reset_run_target",
+                        "   interrupt"
                         "   monitor halt",
+                        "   monitor reset halt",
                         "   monitor resume",
                         "end",
+                        "define pio_restart_target",
+                        "   pio_reset_halt_target",
+                        "   $LOAD_CMDS",
+                        "   $INIT_BREAK",
+                        "   continue",
+                        "end",
                         "target extended-remote $DEBUG_PORT",
-                        "$LOAD_CMDS",
                         "pio_reset_halt_target",
+                        "$LOAD_CMDS",
                         "$INIT_BREAK",
                     ],
                     "onboard": link in debug.get("onboard_tools", []),

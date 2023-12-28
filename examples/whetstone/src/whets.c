@@ -178,11 +178,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "stdatomic.h"
+// zcc report error stdatomic.h:201:17: error: unknown type name 'int_least8_t'; did you mean '__int_least8_t'?
+//#include "stdatomic.h"
+#include "nuclei_sdk_soc.h"
 
 #include "config.h"
 #include "cpuidh.h"
-#include "nuclei_sdk_soc.h"
 
 /*PRECISION PRECISION PRECISION PRECISION PRECISION PRECISION PRECISION*/
 
@@ -192,18 +193,34 @@ void whetstones(long xtra, long x100, int calibrate);
 void pa(SPDP e[4], SPDP t, SPDP t2);
 void po(SPDP e1[4], long j, long k, long l);
 void p3(SPDP* x, SPDP* y, SPDP* z, SPDP t, SPDP t1, SPDP t2);
-void pout(char title[22], float ops, int type, SPDP checknum, SPDP time,
+void pout(char *title, float ops, int type, SPDP checknum, SPDP time,
           int calibrate, int section);
 
 static SPDP loop_time[9];
 static SPDP loop_mops[9];
 static SPDP loop_mflops[9];
 static SPDP TimeUsed;
-static SPDP mwips;
-static char headings[9][18];
+static SPDP mwips, mwips_mhz;
+static char headings[9][22];
 static SPDP Check;
 static SPDP results[9];
-int main()
+
+/* Only support dec number < 1000 */
+static char *dec2str(uint32_t val)
+{
+    static char str[4];
+    val = val % 1000;
+    int decnum = 100;
+    for (int i = 0; i < 3; i ++) {
+        str[i] = val / decnum + '0';
+        val = val % decnum;
+        decnum = decnum / 10;
+    }
+    str[3] = '\0';
+    return str;
+}
+
+int main(void)
 {
     int count = 10, calibrate = 1;
     long xtra = 1;
@@ -212,7 +229,7 @@ int main()
 #if CFG_SIMULATION
     int duration = 1;
 #else
-    int duration = 10;
+    int duration = 3;
 #endif
 
     printf("\n");
@@ -229,10 +246,10 @@ int main()
         calibrate++;
         count--;
 
-#if CFG_SIMU
+#if CFG_SIMULATION
         if (TimeUsed > 0.02)
 #else
-        if (TimeUsed > 2.0)
+        if (TimeUsed > 0.2)
 #endif
         {
             count = 0;
@@ -250,7 +267,7 @@ int main()
 
     calibrate = 0;
 
-    printf("\nUse %d  passes (x 100)\n", xtra);
+    printf("\nUse %u  passes (x 100)\n", (uint32_t)xtra);
     printf("\n          %s Precision C/C++ Whetstone Benchmark", Precision);
 
 #ifdef PRECOMP
@@ -277,9 +294,17 @@ int main()
 
     printf("\nMWIPS/MHz        ");
 
-    printf("%39.3f%19.3f\n\n", mwips / SystemCoreClock * 1000000, TimeUsed);
+    mwips_mhz = mwips / SystemCoreClock * 1000000;
+    printf("%39.3f%19.3f\n\n", mwips_mhz, TimeUsed);
+
+    uint32_t whet_mwips = (uint32_t)(mwips_mhz * 1000);
+    char *pstr = dec2str(whet_mwips);
+    printf("\nCSV, Benchmark, MWIPS/MHz\n");
+    printf("CSV, Whetstone, %u.%s\n", (unsigned int)(whet_mwips/1000), pstr);
+
     if (Check == 0) {
-        printf("Wrong answer  ");
+        printf("Wrong answer  \n");
+        return -1;
     }
 
     return 0;
@@ -506,7 +531,7 @@ void p3(SPDP* x, SPDP* y, SPDP* z, SPDP t, SPDP t1, SPDP t2)
     return;
 }
 
-void pout(char title[18], float ops, int type, SPDP checknum, SPDP time,
+void pout(char *title, float ops, int type, SPDP checknum, SPDP time,
           int calibrate, int section)
 {
     SPDP mops, mflops;

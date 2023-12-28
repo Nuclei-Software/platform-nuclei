@@ -14,12 +14,13 @@
  *
  ****************************************************************************
  */
-
 #include "dhry.h"
-#include "string.h"
-#include <stdlib.h>
-/* Global Variables: */
 
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/* Global Variables: */
 Rec_Pointer     Ptr_Glob,
                 Next_Ptr_Glob;
 int             Int_Glob;
@@ -28,10 +29,6 @@ char            Ch_1_Glob,
                 Ch_2_Glob;
 int             Arr_1_Glob [50];
 int             Arr_2_Glob [50] [50];
-
-//extern char     *malloc ();
-Enumeration     Func_1();
-/* forward declaration necessary since Enumeration may not simply be int */
 
 #ifndef REG
 Boolean Reg = false;
@@ -52,11 +49,20 @@ extern  int     times();
 /* Measurements should last at least about 2 seconds */
 #endif
 #ifdef TIME
-extern long     time();
+extern long     time(void);
 /* see library function "time"  */
 #define Too_Small_Time 2
 /* Measurements should last at least 2 seconds */
 #endif
+
+extern long csr_cycle(void);
+extern long csr_instret(void);
+extern Enumeration Func_1(Capital_Letter   Ch_1_Par_Val, Capital_Letter Ch_2_Par_Val);
+extern Boolean Func_2(Str_30 Str_1_Par_Ref, Str_30 Str_2_Par_Ref);
+extern Boolean Func_3(Enumeration Enum_Par_Val);
+extern void Proc_6(Enumeration Enum_Val_Par, Enumeration* Enum_Ref_Par);
+extern void Proc_7(One_Fifty Int_1_Par_Val, One_Fifty Int_2_Par_Val, One_Fifty* Int_Par_Ref);
+extern void Proc_8(Arr_1_Dim Arr_1_Par_Ref, Arr_2_Dim Arr_2_Par_Ref, int Int_1_Par_Val, int Int_2_Par_Val);
 
 long            Begin_Cycle,
                 End_Cycle,
@@ -73,9 +79,116 @@ float           Microseconds,
 float           DMIPS_MHZ;
 
 /* end of variables for time measurement */
+/* Only support dec number < 1000 */
+static char *dec2str(uint32_t val)
+{
+    static char str[4];
+    val = val % 1000;
+    int decnum = 100;
+    for (int i = 0; i < 3; i ++) {
+        str[i] = val / decnum + '0';
+        val = val % decnum;
+        decnum = decnum / 10;
+    }
+    str[3] = '\0';
+    return str;
+}
 
+void Proc_3(Rec_Pointer* Ptr_Ref_Par)
+/******************/
+/* executed once */
+/* Ptr_Ref_Par becomes Ptr_Glob */
+{
+    if (Ptr_Glob != Null)
+        /* then, executed */
+    {
+        *Ptr_Ref_Par = Ptr_Glob->Ptr_Comp;
+    }
+    Proc_7(10, Int_Glob, &Ptr_Glob->variant.var_1.Int_Comp);
+} /* Proc_3 */
 
-main()
+void Proc_1(REG Rec_Pointer Ptr_Val_Par)
+/******************/
+/* executed once */
+{
+    REG Rec_Pointer Next_Record = Ptr_Val_Par->Ptr_Comp;
+    /* == Ptr_Glob_Next */
+    /* Local variable, initialized with Ptr_Val_Par->Ptr_Comp,    */
+    /* corresponds to "rename" in Ada, "with" in Pascal           */
+
+    structassign(*Ptr_Val_Par->Ptr_Comp, *Ptr_Glob);
+    Ptr_Val_Par->variant.var_1.Int_Comp = 5;
+    Next_Record->variant.var_1.Int_Comp
+        = Ptr_Val_Par->variant.var_1.Int_Comp;
+    Next_Record->Ptr_Comp = Ptr_Val_Par->Ptr_Comp;
+    Proc_3(&Next_Record->Ptr_Comp);
+    /* Ptr_Val_Par->Ptr_Comp->Ptr_Comp
+                        == Ptr_Glob->Ptr_Comp */
+    if (Next_Record->Discr == Ident_1)
+        /* then, executed */
+    {
+        Next_Record->variant.var_1.Int_Comp = 6;
+        Proc_6(Ptr_Val_Par->variant.var_1.Enum_Comp,
+               &Next_Record->variant.var_1.Enum_Comp);
+        Next_Record->Ptr_Comp = Ptr_Glob->Ptr_Comp;
+        Proc_7(Next_Record->variant.var_1.Int_Comp, 10,
+               &Next_Record->variant.var_1.Int_Comp);
+    } else { /* not executed */
+        structassign(*Ptr_Val_Par, *Ptr_Val_Par->Ptr_Comp);
+    }
+} /* Proc_1 */
+
+void Proc_2(One_Fifty* Int_Par_Ref)
+/******************/
+/* executed once */
+/* *Int_Par_Ref == 1, becomes 4 */
+{
+    One_Fifty  Int_Loc;
+    Enumeration   Enum_Loc;
+
+    Int_Loc = *Int_Par_Ref + 10;
+    do /* executed once */
+        if (Ch_1_Glob == 'A')
+            /* then, executed */
+        {
+            Int_Loc -= 1;
+            *Int_Par_Ref = Int_Loc - Int_Glob;
+            Enum_Loc = Ident_1;
+        } /* if */
+    while (Enum_Loc != Ident_1); /* true */
+} /* Proc_2 */
+
+void Proc_4(void)  /* without parameters */
+/*******/
+/* executed once */
+{
+    Boolean Bool_Loc;
+
+    Bool_Loc = Ch_1_Glob == 'A';
+    Bool_Glob = Bool_Loc | Bool_Glob;
+    Ch_2_Glob = 'B';
+} /* Proc_4 */
+
+void Proc_5(void)  /* without parameters */
+/*******/
+/* executed once */
+{
+    Ch_1_Glob = 'A';
+    Bool_Glob = false;
+} /* Proc_5 */
+
+/* Procedure for the assignment of structures,          */
+/* if the C compiler doesn't support this feature       */
+#ifdef  NOSTRUCTASSIGN
+void memcpy(register char* d, register char* s, register int l)
+{
+    while (l--) {
+        *d++ = *s++;
+    }
+}
+#endif
+
+int main(void)
 /*****/
 
 /* main program, corresponds to procedures        */
@@ -120,18 +233,15 @@ main()
         printf("Program compiled without 'register' attribute\n");
         printf("\n");
     }
-    printf("Please give the number of runs through the benchmark: ");
+    printf("Please give the number of runs through the benchmark: \n");
     {
-        int n;
-        //Bob: We dont use scanf
 #ifdef CFG_SIMULATION
         //Bob: for simulation we make it small
-        Number_Of_Runs = 5;
+        Number_Of_Runs = 200;
 #else
         Number_Of_Runs = 500000;
 #endif
     }
-    printf("\n");
 
     printf("Execution starts, %d runs through Dhrystone\n", Number_Of_Runs);
 
@@ -145,10 +255,10 @@ main()
     Begin_Time = (long) time_info.tms_utime;
 #endif
 #ifdef TIME
-    Begin_Time = time((long*) 0);
+    Begin_Time = time();
 #endif
-    Begin_Instret =  csr_instret((long*) 0);
-    Begin_Cycle =  csr_cycle((long*) 0);
+    Begin_Instret =  csr_instret();
+    Begin_Cycle =  csr_cycle();
 
     for (Run_Index = 1; Run_Index <= Number_Of_Runs; ++Run_Index) {
 
@@ -197,16 +307,16 @@ main()
     /**************/
     /* Stop timer */
     /**************/
-    End_Cycle = csr_cycle((long*) 0);
+    End_Cycle = csr_cycle();
+    End_Instret = csr_instret();
 
 #ifdef TIMES
     times(&time_info);
     End_Time = (long) time_info.tms_utime;
 #endif
 #ifdef TIME
-    End_Time = time((long*) 0);
+    End_Time = time();
 #endif
-    End_Instret = csr_instret((long*) 0);
 
     printf("Execution ends\n");
     printf("\n");
@@ -225,7 +335,7 @@ main()
     printf("Arr_2_Glob[8][7]:    %d\n", Arr_2_Glob[8][7]);
     printf("        should be:   Number_Of_Runs + 10\n");
     printf("Ptr_Glob->\n");
-    printf("  Ptr_Comp:          %d\n", (int) Ptr_Glob->Ptr_Comp);
+    printf("  Ptr_Comp:          %ld\n", (long) Ptr_Glob->Ptr_Comp);
     printf("        should be:   (implementation-dependent)\n");
     printf("  Discr:             %d\n", Ptr_Glob->Discr);
     printf("        should be:   %d\n", 0);
@@ -236,7 +346,7 @@ main()
     printf("  Str_Comp:          %s\n", Ptr_Glob->variant.var_1.Str_Comp);
     printf("        should be:   DHRYSTONE PROGRAM, SOME STRING\n");
     printf("Next_Ptr_Glob->\n");
-    printf("  Ptr_Comp:          %d\n", (int) Next_Ptr_Glob->Ptr_Comp);
+    printf("  Ptr_Comp:          %ld\n", (long) Next_Ptr_Glob->Ptr_Comp);
     printf("        should be:   (implementation-dependent), same as above\n");
     printf("  Discr:             %d\n", Next_Ptr_Glob->Discr);
     printf("        should be:   %d\n", 0);
@@ -274,138 +384,33 @@ main()
         printf("Measured time too small to obtain meaningful results\n");
         printf("Please increase number of runs\n");
         printf("\n");
-    } else {
+    }
 #ifdef TIME
-        Microseconds = (float) User_Time * Mic_secs_Per_Second
-                       / (float) Number_Of_Runs;
-        Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time;
+    Microseconds = (float) User_Time * Mic_secs_Per_Second / (float) Number_Of_Runs;
+    Dhrystones_Per_Second = (float) Number_Of_Runs / (float) User_Time;
 #else
-        Microseconds = (float) User_Time * Mic_secs_Per_Second
-                       / ((float) HZ * ((float) Number_Of_Runs));
-        Dhrystones_Per_Second = ((float) HZ * (float) Number_Of_Runs)
-                                / (float) User_Time;
+    Microseconds = (float) User_Time * Mic_secs_Per_Second
+                    / ((float) HZ * ((float) Number_Of_Runs));
+    Dhrystones_Per_Second = ((float) HZ * (float) Number_Of_Runs)
+                            / (float) User_Time;
 #endif
-        Instret =  User_Instret / Number_Of_Runs;
+    Instret =  User_Instret / Number_Of_Runs;
 
-        DMIPS_MHZ = (1000000 / ((float)User_Cycle / (float)Number_Of_Runs)) / 1757;
+    DMIPS_MHZ = (1000000 / ((float)User_Cycle / (float)Number_Of_Runs)) / 1757;
 
-        printf(" (*) User_Cycle for total run through Dhrystone with loops %d: \n", Number_Of_Runs);
-        printf("%ld \n", User_Cycle);
-        printf("       So the DMIPS/MHz can be caculated by: \n");
-        printf("       1000000/(User_Cycle/Number_Of_Runs)/1757 = %2.6f DMIPS/MHz\n", DMIPS_MHZ);
-        printf("\n");
-    }
+    printf(" (*) User_Cycle for total run through Dhrystone with loops %d: \n", Number_Of_Runs);
+    printf("%ld \n", User_Cycle);
+    printf("       So the DMIPS/MHz can be calculated by: \n");
+    printf("       1000000/(User_Cycle/Number_Of_Runs)/1757 = %2.6f DMIPS/MHz\n", DMIPS_MHZ);
+    printf("\n");
 
+    uint32_t dhry_dmips = (uint32_t)(DMIPS_MHZ * 1000);
+    char *pstr = dec2str(dhry_dmips);
+    printf("\nCSV, Benchmark, Iterations, Cycles, DMIPS/MHz\n");
+    printf("CSV, Dhrystone, %u, %u, %u.%s\n", \
+        (unsigned int)Number_Of_Runs, (unsigned int)User_Cycle, (unsigned int)(dhry_dmips/1000), pstr);
+
+    return 0;
 }
-
-
-Proc_1(Ptr_Val_Par)
-/******************/
-
-REG Rec_Pointer Ptr_Val_Par;
-/* executed once */
-{
-    REG Rec_Pointer Next_Record = Ptr_Val_Par->Ptr_Comp;
-    /* == Ptr_Glob_Next */
-    /* Local variable, initialized with Ptr_Val_Par->Ptr_Comp,    */
-    /* corresponds to "rename" in Ada, "with" in Pascal           */
-
-    structassign(*Ptr_Val_Par->Ptr_Comp, *Ptr_Glob);
-    Ptr_Val_Par->variant.var_1.Int_Comp = 5;
-    Next_Record->variant.var_1.Int_Comp
-        = Ptr_Val_Par->variant.var_1.Int_Comp;
-    Next_Record->Ptr_Comp = Ptr_Val_Par->Ptr_Comp;
-    Proc_3(&Next_Record->Ptr_Comp);
-    /* Ptr_Val_Par->Ptr_Comp->Ptr_Comp
-                        == Ptr_Glob->Ptr_Comp */
-    if (Next_Record->Discr == Ident_1)
-        /* then, executed */
-    {
-        Next_Record->variant.var_1.Int_Comp = 6;
-        Proc_6(Ptr_Val_Par->variant.var_1.Enum_Comp,
-               &Next_Record->variant.var_1.Enum_Comp);
-        Next_Record->Ptr_Comp = Ptr_Glob->Ptr_Comp;
-        Proc_7(Next_Record->variant.var_1.Int_Comp, 10,
-               &Next_Record->variant.var_1.Int_Comp);
-    } else { /* not executed */
-        structassign(*Ptr_Val_Par, *Ptr_Val_Par->Ptr_Comp);
-    }
-} /* Proc_1 */
-
-
-Proc_2(Int_Par_Ref)
-/******************/
-/* executed once */
-/* *Int_Par_Ref == 1, becomes 4 */
-
-One_Fifty*   Int_Par_Ref;
-{
-    One_Fifty  Int_Loc;
-    Enumeration   Enum_Loc;
-
-    Int_Loc = *Int_Par_Ref + 10;
-    do /* executed once */
-        if (Ch_1_Glob == 'A')
-            /* then, executed */
-        {
-            Int_Loc -= 1;
-            *Int_Par_Ref = Int_Loc - Int_Glob;
-            Enum_Loc = Ident_1;
-        } /* if */
-    while (Enum_Loc != Ident_1); /* true */
-} /* Proc_2 */
-
-
-Proc_3(Ptr_Ref_Par)
-/******************/
-/* executed once */
-/* Ptr_Ref_Par becomes Ptr_Glob */
-
-Rec_Pointer* Ptr_Ref_Par;
-
-{
-    if (Ptr_Glob != Null)
-        /* then, executed */
-    {
-        *Ptr_Ref_Par = Ptr_Glob->Ptr_Comp;
-    }
-    Proc_7(10, Int_Glob, &Ptr_Glob->variant.var_1.Int_Comp);
-} /* Proc_3 */
-
-
-Proc_4()  /* without parameters */
-/*******/
-/* executed once */
-{
-    Boolean Bool_Loc;
-
-    Bool_Loc = Ch_1_Glob == 'A';
-    Bool_Glob = Bool_Loc | Bool_Glob;
-    Ch_2_Glob = 'B';
-} /* Proc_4 */
-
-
-Proc_5()  /* without parameters */
-/*******/
-/* executed once */
-{
-    Ch_1_Glob = 'A';
-    Bool_Glob = false;
-} /* Proc_5 */
-
-
-/* Procedure for the assignment of structures,          */
-/* if the C compiler doesn't support this feature       */
-#ifdef  NOSTRUCTASSIGN
-memcpy(d, s, l)
-register char*   d;
-register char*   s;
-register int    l;
-{
-    while (l--) {
-        *d++ = *s++;
-    }
-}
-#endif
 
 

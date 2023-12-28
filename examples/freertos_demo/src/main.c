@@ -76,13 +76,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 
 #include "nuclei_sdk_soc.h"
 
 /* The period of the example software timer, specified in milliseconds, and
 converted to ticks using the pdMS_TO_TICKS() macro. */
-#define mainSOFTWARE_TIMER_PERIOD_MS    pdMS_TO_TICKS(1000)
+#define mainSOFTWARE_TIMER_PERIOD_MS    pdMS_TO_TICKS(500)
+#define TASKDLYMS                       pdMS_TO_TICKS(100)
 #define mainQUEUE_LENGTH                (1)
 
 static void prvSetupHardware(void);
@@ -148,7 +148,7 @@ void start_task1(void* pvParameters)
     printf("Enter to task_1\r\n");
     while (1) {
         printf("task1 is running %d.....\r\n", cnt++);
-        vTaskDelay(200);
+        vTaskDelay(TASKDLYMS);
     }
 }
 
@@ -158,7 +158,7 @@ void start_task2(void* pvParameters)
     printf("Enter to task_2\r\n");
     while (1) {
         printf("task2 is running %d.....\r\n", cnt++);
-        vTaskDelay(200);
+        vTaskDelay(TASKDLYMS);
     }
 }
 

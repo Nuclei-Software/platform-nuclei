@@ -17,6 +17,7 @@ EEMBC
 El Dorado Hills, CA, 95762
 */
 #include "coremark.h"
+
 /*
 Topic: Description
     Matrix manipulation benchmark
@@ -44,7 +45,15 @@ void matrix_add_const(ee_u32 N, MATDAT* A, MATDAT val);
 #define matrix_test_next(x) (x+1)
 #define matrix_clip(x,y) ((y) ? (x) & 0x0ff : (x) & 0x0ffff)
 #define matrix_big(x) (0xf000 | (x))
-#define bit_extract(x,from,to) (((x)>>(from)) & (~(0xffffffff << (to))))
+
+// TODO: clang not yet provide any xxlcz instruction support
+#if (defined(__riscv_xxlczbitop) || (defined(__riscv_xxlcz))) && !defined(__clang__) && !defined(NO_EXTRACTU)
+#include "riscv_nuclei_xlcz.h"
+#define BIT_EXTRACT(x, from, to) (__xl_extractu(x, from, to))
+#else
+#define BIT_EXTRACT(x, from, to) (((x)>>(from)) & (~(0xffffffff << (to))))
+#endif
+
 
 #if CORE_DEBUG
 void printmat(MATDAT* A, ee_u32 N, char* name)
@@ -313,7 +322,7 @@ void matrix_mul_matrix_bitextract(ee_u32 N, MATRES* C, MATDAT* A, MATDAT* B)
             C[i * N + j] = 0;
             for (k = 0; k < N; k++) {
                 MATRES tmp = (MATRES)A[i * N + k] * (MATRES)B[k * N + j];
-                C[i * N + j] += bit_extract(tmp, 2, 4) * bit_extract(tmp, 5, 7);
+                C[i * N + j] += BIT_EXTRACT(tmp, 2, 4) * BIT_EXTRACT(tmp, 5, 7);
             }
         }
     }
