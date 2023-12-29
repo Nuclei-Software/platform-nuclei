@@ -5,7 +5,7 @@ Fails = []
 
 for example in os.listdir("examples"):
     print("Use PIO to build %s" % (example))
-    pio_cmd = "pio run -d examples/%s"
+    pio_cmd = "pio run -d examples/%s" %(example)
     print(pio_cmd)
     ret = os.system(pio_cmd)
     if ret != 0:
