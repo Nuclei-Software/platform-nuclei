@@ -1,6 +1,6 @@
 # Nuclei: development platform for [PlatformIO](https://platformio.org)
-[![Build Status](https://travis-ci.com/Nuclei-Software/platform-nuclei.svg?branch=master)](https://travis-ci.com/Nuclei-Software/platform-nuclei)
-[![Build status](https://ci.appveyor.com/api/projects/status/cy7mc2qbd5yalr41?svg=true)](https://ci.appveyor.com/project/fanghuaqi/platform-nuclei)
+
+[![Build Examples](https://github.com/Nuclei-Software/platform-nuclei/actions/workflows/build.yml/badge.svg?branch=feature%2Fgd32vw55x)](https://github.com/Nuclei-Software/platform-nuclei/actions/workflows/build.yml)
 
 [Nuclei System Technology](https://www.nucleisys.com/) is a professional RISC-V IP product company.
 It provides various RISC-V IP products which can meet the requirements of the AIoT era.

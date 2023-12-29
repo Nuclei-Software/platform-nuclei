@@ -17,10 +17,10 @@ $ pio run
 $ pio run --target upload
 
 # Build specific environment
-$ pio run -e nuclei-hbird_eval
+$ pio run -e hbird_eval
 
 # Upload firmware for the specific environment
-$ pio run -e nuclei-hbird_eval --target upload
+$ pio run -e hbird_eval --target upload
 
 # Clean build files
 $ pio run --target clean

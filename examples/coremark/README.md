@@ -17,10 +17,10 @@ $ pio run
 $ pio run --target upload
 
 # Build specific environment
-$ pio run -e nuclei-gd32vf103v_rvstar
+$ pio run -e gd32vf103v_rvstar
 
 # Upload firmware for the specific environment
-$ pio run -e nuclei-gd32vf103v_rvstar --target upload
+$ pio run -e gd32vf103v_rvstar --target upload
 
 # Clean build files
 $ pio run --target clean
