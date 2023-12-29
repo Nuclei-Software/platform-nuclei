@@ -37,26 +37,23 @@ FRAMEWORK_NUCLEI_SOC_CORES_MK = join(FRAMEWORK_DIR, "Build", "Makefile.core")
 
 assert isdir(FRAMEWORK_DIR)
 
-
 def is_valid_soc(soc):
     return isdir(join(FRAMEWORK_DIR, "SoC", soc))
 
+def get_inc_dirs(path):
+    incdirs = []
+    if isdir(path):
+        for dir in listdir(path):
+            dir_path = join(path, dir)
+            if isdir(dir_path):
+                incdirs.append(dir_path)
+    return incdirs
 
-def get_extra_soc_board_incdirs(soc, board):
-    def _get_inc_dirs(path):
-        incdirs = []
-        if isdir(path):
-            for dir in listdir(path):
-                dir_path = join(path, dir)
-                if isdir(dir_path):
-                    incdirs.append(dir_path)
-        return incdirs
-
+def get_soc_board_incdirs(soc, board):
     soc_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Common", "Include")
     board_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Board", board, "Include")
 
-    return _get_inc_dirs(soc_inc_dir_root) + _get_inc_dirs(board_inc_dir_root)
-
+    return [soc_inc_dir_root, board_inc_dir_root]
 
 def select_rtos_package(build_rtos):
     SUPPORTED_RTOSES = ("FreeRTOS", "UCOSII", "RTThread")
@@ -67,8 +64,7 @@ def select_rtos_package(build_rtos):
             selected_rtos = rtos
     return selected_rtos
 
-
-def parse_nuclei_soc_predefined_cores(core_mk):
+def parse_nuclei_predefined_cores(core_mk):
     if not os.path.isfile(core_mk):
         return dict()
     core_arch_abis = dict()
@@ -82,24 +78,62 @@ def parse_nuclei_soc_predefined_cores(core_mk):
                 core_arch_abis[core_lower] = (matches.groups()[1:])
     return core_arch_abis
 
+def find_suitable_ldscript(soc, board, download, variant=""):
+    soc_variant = soc
+    if board == "gd32vf103c_longan_nano":
+        soc_variant = "gd32vf103x8" if variant == "lite" else "gd32vf103xb"
 
-core_arch_abis = parse_nuclei_soc_predefined_cores(FRAMEWORK_NUCLEI_SOC_CORES_MK)
+    if download:
+        ld_script = "gcc_%s_%s.ld" % (soc_variant, download)
+    else:
+        ld_script = "gcc_%s.ld" % build_soc
 
+    build_ldscript = join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Source", "GCC", ld_script)
+    return build_ldscript
+
+def find_arch_abi_tune_cmodel(core, arch, abi, tune, cmodel, splist):
+    if not (arch and abi) and core in splist:
+        if len(splist[core]) == 2:
+            arch, abi = splist[core]
+        elif len(splist[core]) == 3:
+            arch, abi, tune = splist[core]
+    if not cmodel:
+        cmodel = "medlow" if "rv32" in arch else "medany"
+
+    return [arch, abi, tune, cmodel]
+
+def get_arch_flags(arch, abi, tune, cmodel, archext):
+    optlist = ["-g"]
+    optlist.append("-march=%s%s" % (arch, archext)) if arch else optlist
+    optlist.append("-mabi=%s" % (abi)) if abi else optlist
+    optlist.append("-mcmodel=%s" % (cmodel)) if cmodel else optlist
+    optlist.append("-mtune=%s" % (tune)) if tune else optlist
+    return optlist
+
+# Get core arch/abi/mtune list
+core_arch_abis = parse_nuclei_predefined_cores(FRAMEWORK_NUCLEI_SOC_CORES_MK)
+
+# get build soc
 build_soc = board.get("build.soc", "").strip()
 
 if not build_soc:
     sys.stderr.write(
-        "build.soc is not defined in board description json file, please check!")
+        "build.soc is not defined in board description json file %s.json, please check!" % (build_board))
     env.Exit(1)
 
-if build_soc == "hbird":
-    print("%s SoC is deprecated, please use demosoc instead!" %(build_soc))
-    build_soc = "demosoc"
+# Check whether soc is supported by this nuclei sdk
+if build_soc in ("hbird", "demosoc"):
+    if not is_valid_soc(build_soc):
+        print("%s SoC is deprecated, please use evalsoc instead!" %(build_soc))
+        build_soc = "evalsoc"
 
-BUILTIN_ALL_DOWNLOADED_MODES = ("ilm", "flash", "flashxip", "ddr", "sram", "sramxip")
+if not is_valid_soc(build_soc):
+    sys.stderr.write("Could not find SoC software package for SoC %s" % build_soc)
+    env.Exit(1)
 
 build_core = board.get("build.core", "").lower().strip()
 build_arch_ext = board.get("build.arch_ext", "").lower().strip()
+
 build_march = board.get("build.march", "").lower().strip()
 build_mabi = board.get("build.mabi", "").lower().strip()
 build_mtune = board.get("build.mtune", "").lower().strip()
@@ -108,115 +142,48 @@ build_mcmodel = board.get("build.mcmodel", "").lower().strip()
 build_rtos = board.get("build.rtos", "").lower().strip()
 build_rtthread_msh = board.get("build.rtthread_msh", "").lower().strip()
 build_variant = board.get("build.variant", "").lower().strip()
+build_toolchain = board.get("build.toolchain", "").lower().strip()
+build_download = board.get("build.download", "").lower().strip()
+build_stdclib = board.get("build.stdclib", "newlib_small").lower().strip()
+build_stacksz = board.get("build.stacksz", "").lower().strip()
+build_heapsz = board.get("build.heapsz", "").lower().strip()
+build_ldscript = board.get("build.ldscript", "").lower().strip()
+build_nmsis_lib = board.get("build.nmsis_lib", "").lower().strip()
+build_nmsis_lib_arch = board.get("build.nmsis_lib_arch", "").lower().strip()
+build_usb_driver = board.get("build.usb_driver", "").lower().strip()
+build_smp = board.get("build.smp", "").lower().strip()
+build_boot_hartid = board.get("build.boot_hartid", "").lower().strip()
+build_hartid_ofs = board.get("build.hartid_ofs", "").lower().strip()
+build_sysclk = board.get("build.sysclk", "").lower().strip()
+build_clksrc = board.get("build.clksrc", "").lower().strip()
+build_hxtal_value = board.get("build.hxtal_value", "").lower().strip()
 
 selected_rtos = select_rtos_package(build_rtos)
 
-build_download_mode = board.get("build.download", "").lower().strip()
+if not build_ldscript:
+    build_ldscript = find_suitable_ldscript(build_soc, build_board, build_download, build_variant)
 
-build_supported_download_modes = board.get("build.download_modes", [])
-
-# Get supported download modes
-build_supported_download_modes = [mode.lower().strip() for mode in build_supported_download_modes]
-# intersection of BUILTIN_ALL_DOWNLOADED_MODES, build.download_modes, build.download
-mixed_supported_download_modes = list(set(BUILTIN_ALL_DOWNLOADED_MODES).intersection(
-    build_supported_download_modes))
-
-if build_soc == "evalsoc":
-    if build_download_mode not in mixed_supported_download_modes:
-        # If build.download not defined for Nuclei demosoc SoC, use default "ILM"
-        chosen_download_mode = "ilm" if len(mixed_supported_download_modes) == 0 else mixed_supported_download_modes[0]
-        print("Download mode %s is not supported for SOC %s, use default download mode %s" \
-             % (build_download_mode, build_soc, chosen_download_mode))
-        build_download_mode = chosen_download_mode
-else:
-    if build_download_mode not in mixed_supported_download_modes:
-        chosen_download_mode = "flashxip" if len(mixed_supported_download_modes) == 0 else mixed_supported_download_modes[0]
-        print("Download mode %s is not supported for SOC %s, use default download mode %s" \
-             % (build_download_mode, build_soc, chosen_download_mode))
-        build_download_mode = chosen_download_mode
-
-print("Supported downloaded modes for board %s are %s, chosen downloaded mode is %s" \
-    % (build_board, mixed_supported_download_modes, build_download_mode))
-
-if not board.get("build.ldscript", ""):
-    build_soc_variant = build_soc
-    if build_board == "gd32vf103c_longan_nano":
-        if build_variant == "lite":
-            build_soc_variant = "gd32vf103x8"
-        else:
-            build_soc_variant = "gd32vf103xb"
-
-    ld_script = "gcc_%s_%s.ld" % (
-        build_soc_variant, build_download_mode) if build_download_mode else "gcc_%s.ld" % build_soc
-    build_ldscript = join(
-        FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Source", "GCC", ld_script)
-    env.Replace(LDSCRIPT_PATH=build_ldscript)
-else:
-    print("Use user defined ldscript %s" % board.get("build.ldscript"))
-
-# Use correct downloaded modes
-DOWNLOAD_MODE = "DOWNLOAD_MODE_%s" % build_download_mode.upper()
-
-if selected_rtos:
-    RTOS_MACRO = ("RTOS_%s" % selected_rtos.upper())
-else:
-    RTOS_MACRO = ("NO_RTOS_SERVICE")
-
-default_arch_abi = ("rv32imac", "ilp32")
-
-if not build_mabi and not build_march and build_core in core_arch_abis:
-    if len(core_arch_abis[build_core]) == 2:
-        build_march, build_mabi = core_arch_abis[build_core]
-    elif len(core_arch_abis[build_core]) == 3:
-        build_march, build_mabi, build_mtune = core_arch_abis[build_core]
-else:
-    if not build_mabi or not build_march:
-        build_march, build_mabi = default_arch_abi
-        print("No mabi and march specified in board json file, use default -march=%s -mabi=%s!" % (build_march, build_mabi))
-
-if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
-    rtt_srcfilter = "+<*> -<**/iar/>"
-else:
-    rtt_srcfilter = "+<*> -<**/iar/> -<components/>"
+build_march, build_mabi, build_mtune, build_mcmodel = find_arch_abi_tune_cmodel(build_core, build_march, build_mabi, build_mtune, build_mcmodel, core_arch_abis)
 
 env.SConscript("_bare.py", exports="env")
+print("Use ldscript %s" % build_ldscript)
+env.Replace(LDSCRIPT_PATH=build_ldscript)
 
 target_map = join("$BUILD_DIR", "${PROGNAME}.map")
 
-build_mtune_opt = ""
-if build_mtune != "":
-    build_mtune_opt = "-mtune=%s" % build_mtune
-if build_mcmodel == "":
-    if "rv32" in build_march:
-        build_mcmodel = "medlow"
-    else:
-        build_mcmodel = "medany"
+build_arch_flags = get_arch_flags(build_march, build_mabi, build_mtune, build_mcmodel, build_arch_ext)
 
-build_march = "%s%s" % (build_march, build_arch_ext)
+if not build_nmsis_lib_arch:
+    build_nmsis_lib_arch = "%s%s" % (build_march, build_arch_ext)
 
-env.Append(
-    CCFLAGS=[
-        "-march=%s" % build_march,
-        "-mabi=%s" % build_mabi,
-        "-mcmodel=%s" % build_mcmodel,
-        "%s" % build_mtune_opt
-    ],
-
-    ASFLAGS=[
-        "-march=%s" % build_march,
-        "-mabi=%s" % build_mabi,
-        "-mcmodel=%s" % build_mcmodel,
-        "%s" % build_mtune_opt
-    ],
-
-    LINKFLAGS=[
-        "-march=%s" % build_march,
-        "-mabi=%s" % build_mabi,
-        "-mcmodel=%s" % build_mcmodel,
-        "%s" % build_mtune_opt,
+build_common_flags = build_arch_flags
+build_asmflags = []
+build_cflags = []
+build_cxxflags = []
+build_ldflags = [
         "-Wl,-Map,%s" % target_map,
         "-nostartfiles",
-        "--specs=nano.specs",
+        "-nodefaultlibs",
         "-u", "_isatty",
         "-u", "_write",
         "-u", "_sbrk",
@@ -224,61 +191,123 @@ env.Append(
         "-u", "_close",
         "-u", "_fstat",
         "-u", "_lseek",
-        "-u", "errno"
-    ],
+        "-u", "errno"]
 
-    CPPDEFINES=[
-        ("DOWNLOAD_MODE", DOWNLOAD_MODE),
-        ("DOWNLOAD_MODE_STRING", "\\\"%s\\\"" % build_download_mode),
-        ("VECTOR_TABLE_REMAPPED") if build_download_mode == "flash" else ("VECTOR_TABLE_NOT_REMAPPED"),
-        RTOS_MACRO
-    ],
+build_cppdefines = []
+build_cpppaths = [
+    "$PROJECT_SRC_DIR", "$PROJECT_INCLUDE_DIR", join(FRAMEWORK_DIR, "NMSIS", "Core", "Include"),
+    join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include"),
+    join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Include")]
+build_libpaths = []
+build_libs = []
 
-    CPPPATH=[
-        "$PROJECT_SRC_DIR",
-        "$PROJECT_INCLUDE_DIR",
-        join(FRAMEWORK_DIR, "NMSIS", "Include"),
-        join(FRAMEWORK_DIR, "NMSIS", "Core", "Include"),
-        join(FRAMEWORK_DIR, "NMSIS", "DSP", "Include"),
-        join(FRAMEWORK_DIR, "NMSIS", "DSP", "PrivateInclude"),
-        join(FRAMEWORK_DIR, "NMSIS", "NN", "Include"),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include"),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Include"),
-    ],
+stubname = "newlib"
+# process stdclib
+if build_stdclib.startswith("libncrt"):
+    stubname = "libncrt"
+    ncrtlib = build_stdclib.replace("lib", "")
+    build_libs = [ncrtlib, "fileops_uart", "heapops_basic"]
+    build_common_flags.extend(["-isystem", "/include/libncrt"])
+else:
+    build_common_flags.extend(["-isystem", "/include/newlib-nano"])
+    if build_stdclib == "newlib_full":
+        build_libs.extend(["c", "gcc", "m", "stdc++"])
+    else:
+        build_libs.extend(["c_nano", "gcc", "m", "stdc++"])
+        if build_stdclib == "newlib_fast":
+            build_ldflags.extend(["-u", "_printf_float", "-u", "_scanf_float"])
+        elif build_stdclib == "newlib_small":
+            build_ldflags.extend(["-u", "_printf_float"])
+        if build_toolchain == "nuclei_llvm":
+            build_ldflags.extend(["-u", "_printf_float", "-u", "__on_exit_args"])
 
-    LIBPATH=[
-        join(FRAMEWORK_DIR, "NMSIS", "Library", "DSP", "GCC"),
-        join(FRAMEWORK_DIR, "NMSIS", "Library", "NN", "GCC")
-    ],
+if build_download:
+    build_cppdefines.extend([("DOWNLOAD_MODE", "DOWNLOAD_MODE_%s" % (build_download.upper())),
+        ("DOWNLOAD_MODE_STRING", "\\\"%s\\\"" % build_download),
+        "VECTOR_TABLE_REMAPPED" if build_download == "flash" else "VECTOR_TABLE_NOT_REMAPPED"])
 
-    LIBS=["gcc", "m", "stdc++"]
-)
+if selected_rtos:
+    build_cppdefines.extend(["RTOS_%s" % selected_rtos.upper()])
 
-# WORKAROUND: If RT-Thread used, force it to include symbols from finsh
-# otherwise it will not be included
-if build_rtthread_msh == "1":
-    env.Append(LINKFLAGS=["-u", "finsh_system_init"])
+if build_nmsis_lib:
+    sel_nmsis_libs = build_nmsis_lib.split()
+    print(sel_nmsis_libs)
+    for lib in ["dsp", "nn"]:
+        libname = "nmsis_%s" % (lib)
+        if libname in sel_nmsis_libs:
+            build_libs.extend(["%s_%s" % (libname, build_nmsis_lib_arch)])
+            build_libpaths.extend([join(FRAMEWORK_DIR, "NMSIS", "Library", lib.upper(), "GCC")])
+            build_cpppaths.extend([join(FRAMEWORK_DIR, "NMSIS", lib.upper(), "Include")])
+            if lib == "dsp":
+                build_cpppaths.extend([join(FRAMEWORK_DIR, "NMSIS", lib.upper(), "PrivateInclude")])
 
-extra_incdirs = get_extra_soc_board_incdirs(build_soc, build_board)
-if extra_incdirs:
-    env.Append(
-        CPPPATH=extra_incdirs
-    )
+if build_soc == "gd32vf103" and build_usb_driver != "":
+    build_cpppaths.extend([join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include", "Usb")])
 
-if not is_valid_soc(build_soc):
-    sys.stderr.write("Could not find BSP package for SoC %s" % build_soc)
-    env.Exit(1)
+if build_heapsz:
+    build_ldflags.extend(["-Wl,--defsym=__HEAP_SIZE=%s" % (build_heapsz)])
+
+if build_stacksz:
+    build_ldflags.extend(["-Wl,--defsym=__STACK_SIZE=%s" % (build_stacksz)])
+
+if build_smp:
+    build_cppdefines.extend([("SMP_CPU_CNT", build_smp)])
+    build_ldflags.extend(["-Wl,--defsym=__SMP_CPU_CNT=%s" % (build_smp)])
+
+if build_boot_hartid:
+    build_cppdefines.extend([("BOOT_HARTID", build_boot_hartid)])
+
+if build_hartid_ofs:
+    build_cppdefines.extend([("__HARTID_OFFSET", build_hartid_ofs)])
+
+if build_sysclk:
+    build_cppdefines.extend([("SYSTEM_CLOCK", build_sysclk)])
+
+if build_clksrc:
+    build_cppdefines.extend(["SYSCLK_USING_%s" % (build_clksrc.upper())])
+
+if build_hxtal_value:
+    build_cppdefines.extend([("HXTAL_VALUE", build_hxtal_value)])
+
+if build_toolchain == "nuclei_llvm":
+    build_ldflags.extend(["-fuse-ld=lld"])
+    env.Replace(
+        AR="llvm-ar",
+        AS="riscv64-unknown-elf-clang",
+        CC="riscv64-unknown-elf-clang",
+        CXX="riscv64-unknown-elf-clang++",
+        RANLIB="llvm-ranlib"
+        )
+
+
+# Append generic options
+env.Append(
+    ASFLAGS = build_common_flags + build_asmflags,
+    CFLAGS = build_common_flags + build_cflags,
+    CXXFLAGS = build_common_flags + build_cxxflags,
+    LINKFLAGS = build_common_flags + build_ldflags,
+    CPPDEFINES = build_cppdefines,
+    CPPPATH = build_cpppaths,
+    LIBPATH = build_libpaths,
+    LIBS = build_libs)
 
 #
 # Target: Build Nuclei SDK Libraries
 #
+
+if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
+    rtt_srcfilter = "+<*> -<**/iar/>"
+else:
+    rtt_srcfilter = "+<*> -<**/iar/> -<components/>"
+
 soclibname = "soc_" + build_soc
 boardlibname = "board_" + build_board
+
 libs = [
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, soclibname),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Common"),
-        src_filter="+<*> -<**/IAR/> -<**/iardlib/> -<**/libncrt/> -<**/Usb/>"
+        src_filter="+<*> -<**/IAR/> -<**/Stubs/> -<**/Usb/> +<**/%s/>" % (stubname)
     ),
 
     env.BuildLibrary(
@@ -327,5 +356,20 @@ elif selected_rtos == "RTThread":
             join(FRAMEWORK_DIR, "OS", "RTThread", "components", "finsh")
         ]
     )
+
+if build_soc == "gd32vf103" and build_usb_driver != "":
+    usb_srcfilter = "+<*>"
+    if build_usb_driver == "device":
+        usb_srcfilter = "+<*> -<usbh_*.c>"
+    elif build_usb_driver == "host":
+        usb_srcfilter = "+<*> -<usbd_*.c>"
+    else:
+        usb_srcfilter = "+<*>"
+
+    libs.append(env.BuildLibrary(
+        join("$BUILD_DIR", "SoC", build_soc, "%s_usb" %(soclibname)),
+        join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Usb"),
+            src_filter=usb_srcfilter
+        ))
 
 env.Prepend(LIBS=libs)
