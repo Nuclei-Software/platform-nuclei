@@ -196,15 +196,18 @@ def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk
     if pio.VERSION[0] < 6:
         print("PlatformIO %s need to >= 6.x, see https://docs.platformio.org/en/latest/core/history.html#platformio-core-6" % (".".join(pio.VERSION)))
         return False
+    sys.stdout.flush()
     nucleistudio_loc = os.path.join(os.getcwd(), PREBLT_TOOLS, "NucleiStudio", "toolchain")
     os.system("pio pkg install -g -t symlink://%s" % (os.path.join(nucleistudio_loc, "gcc")))
     os.system("pio pkg install -g -t symlink://%s" % (os.path.join(nucleistudio_loc, "openocd")))
     os.system("pio pkg install -g -t symlink://%s" % (os.path.join(nucleistudio_loc, "gd_openocd")))
     print("Install Nuclei SDK from %s" % (nsdk_url))
+    sys.stdout.flush()
     os.system("pio pkg install -g -t %s" % (nsdk_url))
     print("Install platform nuclei from current folder!")
     os.system("pio pkg install -g -p symlink://%s" % (os.getcwd()))
     print("List installed pio packages")
+    sys.stdout.flush()
     os.system("pio pkg list -g")
     return True
 
