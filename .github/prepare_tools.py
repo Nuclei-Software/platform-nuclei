@@ -6,6 +6,8 @@ import tarfile
 import shutil
 import json
 import requests
+import hashlib
+
 from urllib.parse import urlparse
 import argparse
 try:
@@ -29,6 +31,24 @@ def download_file(url, file_name):
         wget.download(url, file_name)
     pass
 
+def get_file_size(file_path):
+    return os.path.getsize(file_path)
+
+def calculate_md5(file_path, buffer_size=8192):
+    md5_hash = hashlib.md5()
+    with open(file_path, "rb") as file:
+        for chunk in iter(lambda: file.read(buffer_size), b""):
+            md5_hash.update(chunk)
+    return md5_hash.hexdigest()
+
+def md5sum_file(file_path):
+    if os.path.isfile(file_path) == False:
+        print("{file_path} not existed!")
+        return False
+    print("{file_path} size %s bytes" % (get_file_size(file_path)))
+    print("{file_path} md5 %s" % (calculate_md5(file_path)))
+    return True
+
 def download_with_progress(url, destination_folder, reuse=False):
     file_name = os.path.join(destination_folder, os.path.basename(urlparse(url).path))
     if os.path.isdir(destination_folder) == False:
@@ -42,6 +62,7 @@ def download_with_progress(url, destination_folder, reuse=False):
         print("%s is downloaded!" % (file_name))
     else:
         print("%s already downloaded!" % (file_name))
+    md5sum_file(file_name)
 
     return file_name
 
