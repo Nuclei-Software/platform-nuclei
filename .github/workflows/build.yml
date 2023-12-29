@@ -36,7 +36,7 @@ jobs:
       - name: Upload cached packages
         uses: actions/upload-artifact@v3
         with:
-          name: prebuilt_caching
+          name: prebuilt_caching_${{ matrix.os }}
           path: |
             prebuilt_dlcache
 
