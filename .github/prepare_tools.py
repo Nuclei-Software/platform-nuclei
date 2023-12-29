@@ -61,6 +61,7 @@ def download_and_extract(url, extract_folder, reuse=False):
         with tarfile.open(file_name, "r:gz") as tar_ref:
             tar_ref.extractall(extract_folder)
 
+    print("List in this directory %s: %s" %(extract_folder, os.listdir(extract_folder)))
     # Remove the temporary file
     if reuse == False and os.path.isfile(file_name):
         os.remove(file_name)
