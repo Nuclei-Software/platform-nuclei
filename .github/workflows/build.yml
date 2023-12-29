@@ -17,6 +17,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.9"
+
       - name: Install dependencies
         run: |
           pip install -U https://github.com/platformio/platformio/archive/develop.zip
@@ -25,6 +26,12 @@ jobs:
       - name: Install Nuclei Tools and PIO Packages
         run: |
           python3 .github/prepare_tools.py
+
+      - name: Caching Nuclei Tools
+        uses: actions/cache@v3
+        with:
+          path: prebuilt_dlcache
+          key: build
 
       - name: Build examples
         run: |
