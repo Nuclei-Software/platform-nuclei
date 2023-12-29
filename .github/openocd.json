@@ -1,0 +1,22 @@
+{
+  "name": "tool-openocd-nuclei",
+  "version": "0.11.0",
+  "description": "Open On-Chip Debugger branch with RISC-V Nuclei support",
+  "keywords": [
+    "tools",
+    "debugger",
+    "debug server",
+    "uploader",
+    "risc-v"
+  ],
+  "homepage": "http://openocd.org",
+  "license": "GPL-2.0-or-later",
+  "system": [
+    "windows_x86",
+    "windows_amd64"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/riscv-mcu/riscv-openocd"
+  }
+}
