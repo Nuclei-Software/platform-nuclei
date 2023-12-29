@@ -22,7 +22,7 @@
     "jlink_device": "GD32VW553HM",
     "svd_path": "GD32VW55X.svd",
     "onboard_tools": [
-      "rv-link"
+      "gd-link"
     ]
   },
   "frameworks": [
@@ -34,10 +34,10 @@
     "maximum_size": 2097152,
     "flash_start": "0x08000000",
     "sram_start": "0x20000000",
-    "protocol": "rv-link",
+    "protocol": "gd-link",
     "protocols": [
       "jlink",
-      "rv-link"
+      "gd-link"
     ]
   },
   "url": "https://www.gigadevice.com/product/mcu/risc-v",
