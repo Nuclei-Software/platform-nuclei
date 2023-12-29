@@ -25,6 +25,7 @@ from SCons.Script import (ARGUMENTS, COMMAND_LINE_TARGETS, AlwaysBuild,
 env = DefaultEnvironment()
 platform = env.PioPlatform()
 board_config = env.BoardConfig()
+build_board = board_config.id
 
 env.Replace(
     AR="riscv64-unknown-elf-gcc-ar",
@@ -159,8 +160,15 @@ elif upload_protocol in debug_tools:
             "-c", "reset halt; ",
             "-c", "program {$SOURCE} verify; reset halt; resume; shutdown;"
         ])
+    # TODO workaround for gd32vw553h_eval board, we need to use gd32 distributed openocd
+    if build_board == "gd32vw553h_eval":
+        openocd_dir = platform.get_package_dir("tool-openocd-gd32")
+    else:
+        openocd_dir = platform.get_package_dir("tool-openocd-nuclei")
+    openocd_exe = join(openocd_dir, "bin", "openocd")
+
     env.Replace(
-        UPLOADER="openocd",
+        UPLOADER=openocd_exe,
         UPLOADERFLAGS=openocd_args,
         UPLOADCMD="$UPLOADER $UPLOADERFLAGS")
     upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
