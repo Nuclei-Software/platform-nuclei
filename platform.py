@@ -35,7 +35,7 @@ class NucleiPlatform(PlatformBase):
         # debug tools
         debug = board.manifest.get("debug", {})
         build = board.manifest.get("build", {})
-        non_ftdi_tools = ["jlink", "gd-link", "rv-link", "altera-usb-blaster"]
+        non_ftdi_tools = ["jlink", "gd-link", "altera-usb-blaster"]
         upload_protocols = board.manifest.get("upload", {}).get("protocols", [])
 
         if "tools" not in debug:
@@ -50,7 +50,7 @@ class NucleiPlatform(PlatformBase):
             if link in debug["tools"]:
                 continue
 
-            if link == "rv-link":
+            if link in ["rv-link", "gd-link"]:
                 board_cfg = join(
                     sdk_dir,
                     "SoC",
@@ -64,7 +64,7 @@ class NucleiPlatform(PlatformBase):
                         sdk_dir, "SoC", build_soc, "Board", build_board, "openocd.cfg",
                     )
                 server_args = ["-c", "debug_level 1", "-f", board_cfg]
-                debug["tools"]["rv-link"] = {
+                debug["tools"][link] = {
                     "hwids": [["0x28e9", "0x018a"]],
                     "require_debug_port": True,
                 }

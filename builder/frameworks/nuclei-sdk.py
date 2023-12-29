@@ -102,12 +102,13 @@ def find_arch_abi_tune_cmodel(core, arch, abi, tune, cmodel, splist):
 
     return [arch, abi, tune, cmodel]
 
-def get_arch_flags(arch, abi, tune, cmodel, archext):
+def get_arch_flags(arch, abi, tune, cmodel, archext, toolchain):
     optlist = ["-g"]
     optlist.append("-march=%s%s" % (arch, archext)) if arch else optlist
     optlist.append("-mabi=%s" % (abi)) if abi else optlist
     optlist.append("-mcmodel=%s" % (cmodel)) if cmodel else optlist
-    optlist.append("-mtune=%s" % (tune)) if tune else optlist
+    if toolchain == "nuclei_gnu":
+        optlist.append("-mtune=%s" % (tune)) if tune else optlist
     return optlist
 
 # Get core arch/abi/mtune list
@@ -145,6 +146,8 @@ build_variant = board.get("build.variant", "").lower().strip()
 build_toolchain = board.get("build.toolchain", "").lower().strip()
 build_download = board.get("build.download", "").lower().strip()
 build_stdclib = board.get("build.stdclib", "newlib_small").lower().strip()
+build_simu = board.get("build.simu", "").lower().strip()
+build_ncrtio = board.get("build.ncrtio", "uart").lower().strip()
 build_stacksz = board.get("build.stacksz", "").lower().strip()
 build_heapsz = board.get("build.heapsz", "").lower().strip()
 build_ldscript = board.get("build.ldscript", "").lower().strip()
@@ -171,7 +174,7 @@ env.Replace(LDSCRIPT_PATH=build_ldscript)
 
 target_map = join("$BUILD_DIR", "${PROGNAME}.map")
 
-build_arch_flags = get_arch_flags(build_march, build_mabi, build_mtune, build_mcmodel, build_arch_ext)
+build_arch_flags = get_arch_flags(build_march, build_mabi, build_mtune, build_mcmodel, build_arch_ext, build_toolchain)
 
 if not build_nmsis_lib_arch:
     build_nmsis_lib_arch = "%s%s" % (build_march, build_arch_ext)
@@ -206,7 +209,7 @@ stubname = "newlib"
 if build_stdclib.startswith("libncrt"):
     stubname = "libncrt"
     ncrtlib = build_stdclib.replace("lib", "")
-    build_libs = [ncrtlib, "fileops_uart", "heapops_basic"]
+    build_libs = [ncrtlib, "fileops_%s" % (build_ncrtio), "heapops_basic"]
     build_common_flags.extend(["-isystem", "/include/libncrt"])
 else:
     build_common_flags.extend(["-isystem", "/include/newlib-nano"])
@@ -220,6 +223,11 @@ else:
             build_ldflags.extend(["-u", "_printf_float"])
         if build_toolchain == "nuclei_llvm":
             build_ldflags.extend(["-u", "_printf_float", "-u", "__on_exit_args"])
+
+if build_toolchain == "nuclei_gnu":
+    build_ldflags.append("-Wl,--no-warn-rwx-segments")
+    if "zc" in build_arch_ext:
+        build_common_flags.extend(["-fomit-frame-pointer", "-fno-shrink-wrap-separate"])
 
 if build_download:
     build_cppdefines.extend([("DOWNLOAD_MODE", "DOWNLOAD_MODE_%s" % (build_download.upper())),
@@ -243,6 +251,9 @@ if build_nmsis_lib:
 
 if build_soc == "gd32vf103" and build_usb_driver != "":
     build_cpppaths.extend([join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include", "Usb")])
+
+if build_simu:
+    build_cppdefines.extend([("SIMULATION_MODE", "SIMULATION_MODE_%s" % (build_simu.upper()))])
 
 if build_heapsz:
     build_ldflags.extend(["-Wl,--defsym=__HEAP_SIZE=%s" % (build_heapsz)])
@@ -269,6 +280,14 @@ if build_clksrc:
 if build_hxtal_value:
     build_cppdefines.extend([("HXTAL_VALUE", build_hxtal_value)])
 
+# WORKAROUND: If RT-Thread used, force it to include symbols from finsh
+# otherwise it will not be included
+if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
+    build_ldflags.extend(["-u", "finsh_system_init"])
+    rtt_srcfilter = "+<*> -<**/iar/>"
+else:
+    rtt_srcfilter = "+<*> -<**/iar/> -<components/>"
+
 if build_toolchain == "nuclei_llvm":
     build_ldflags.extend(["-fuse-ld=lld"])
     env.Replace(
@@ -277,8 +296,7 @@ if build_toolchain == "nuclei_llvm":
         CC="riscv64-unknown-elf-clang",
         CXX="riscv64-unknown-elf-clang++",
         RANLIB="llvm-ranlib"
-        )
-
+    )
 
 # Append generic options
 env.Append(
@@ -289,17 +307,12 @@ env.Append(
     CPPDEFINES = build_cppdefines,
     CPPPATH = build_cpppaths,
     LIBPATH = build_libpaths,
-    LIBS = build_libs)
+    LIBS = build_libs
+    )
 
 #
 # Target: Build Nuclei SDK Libraries
 #
-
-if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
-    rtt_srcfilter = "+<*> -<**/iar/>"
-else:
-    rtt_srcfilter = "+<*> -<**/iar/> -<components/>"
-
 soclibname = "soc_" + build_soc
 boardlibname = "board_" + build_board
 
@@ -309,7 +322,6 @@ libs = [
         join(FRAMEWORK_DIR, "SoC", build_soc, "Common"),
         src_filter="+<*> -<**/IAR/> -<**/Stubs/> -<**/Usb/> +<**/%s/>" % (stubname)
     ),
-
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, "Board", boardlibname),
         join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board),
@@ -324,7 +336,7 @@ if selected_rtos == "FreeRTOS":
         src_filter="+<*> -<portable/MemMang/> -<portable/IAR/> +<portable/MemMang/heap_4.c>"
     ))
     env.Append(
-        CPPPATH=[
+        CPPPATH = [
             join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "include"),
             join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "portable")
         ]
@@ -336,7 +348,7 @@ elif selected_rtos == "UCOSII":
         src_filter="+<*> -<arch/iar/>"
     ))
     env.Append(
-        CPPPATH=[
+        CPPPATH = [
             join(FRAMEWORK_DIR, "OS", "UCOSII", "arch"),
             join(FRAMEWORK_DIR, "OS", "UCOSII", "cfg"),
             join(FRAMEWORK_DIR, "OS", "UCOSII", "source")
@@ -349,26 +361,32 @@ elif selected_rtos == "RTThread":
         src_filter=rtt_srcfilter
     ))
     env.Append(
-        CPPPATH=[
+        CPPPATH = [
             join(FRAMEWORK_DIR, "OS", "RTThread", "libcpu", "risc-v", "nuclei"),
             join(FRAMEWORK_DIR, "OS", "RTThread", "include"),
-            join(FRAMEWORK_DIR, "OS", "RTThread", "include", "libc"),
-            join(FRAMEWORK_DIR, "OS", "RTThread", "components", "finsh")
-        ]
+            join(FRAMEWORK_DIR, "OS", "RTThread", "include", "libc")
+            ]
     )
+    if build_rtthread_msh == "1":
+        env.Append(
+            CPPPATH = [
+                join(FRAMEWORK_DIR, "OS", "RTThread", "components", "finsh")
+                ]
+        )
 
+# process usb library
 if build_soc == "gd32vf103" and build_usb_driver != "":
     usb_srcfilter = "+<*>"
     if build_usb_driver == "device":
-        usb_srcfilter = "+<*> -<usbh_*.c>"
+        usb_srcfilter = "+<*> -<*usbh_*.c> -<drv_usb_host.c>"
     elif build_usb_driver == "host":
-        usb_srcfilter = "+<*> -<usbd_*.c>"
+        usb_srcfilter = "+<*> -<*usbd_*.c> -<drv_usb_dev.c>"
     else:
         usb_srcfilter = "+<*>"
 
     libs.append(env.BuildLibrary(
-        join("$BUILD_DIR", "SoC", build_soc, "%s_usb" %(soclibname)),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Usb"),
+            join("$BUILD_DIR", "SoC", build_soc, "%s_usb" %(soclibname)),
+            join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Source", "Drivers", "Usb"),
             src_filter=usb_srcfilter
         ))
 

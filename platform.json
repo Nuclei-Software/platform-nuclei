@@ -37,7 +37,11 @@
       "type": "framework",
       "version": "~0.5.0"
     },
-
+    "tool-openocd-nuclei": {
+      "optional": true,
+      "type": "uploader",
+      "version": "~0.11.0"
+    },
     "tool-openocd-gd32": {
       "optional": true,
       "type": "uploader",
@@ -47,7 +51,7 @@
       "type": "uploader",
       "optional": true,
       "owner": "platformio",
-      "version": "^1.65200.0"
+      "version": "^1.78811.0"
     }
   }
 }
