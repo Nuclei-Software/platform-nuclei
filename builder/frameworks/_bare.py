@@ -26,18 +26,12 @@ env.Append(
         "-x", "assembler-with-cpp",
     ],
     CCFLAGS=[
-        "-Os",
-        "-Wall",  # show warnings
         "-ffunction-sections",
         "-fdata-sections",
         "-fno-common"
     ],
 
     LINKFLAGS=[
-        "-Os",
-        "-ffunction-sections",
-        "-fdata-sections",
-        "-fno-common",
         "-Wl,--gc-sections"
     ],
 
