@@ -178,7 +178,15 @@ def prepare_tools():
 def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x"):
     if os.path.isfile("platform.py") == False:
         print("Not in platform nuclei folder, exit")
-        return
+        return False
+    try:
+        import platformio as pio
+    except:
+        print("PlatformIO maybe not installed or not set in PATH, please check!")
+        return False
+    if pio.VERSION[0] < 6:
+        print("PlatformIO %s need to >= 6.x, see https://docs.platformio.org/en/latest/core/history.html#platformio-core-6" % (".".join(pio.VERSION)))
+        return False
     nucleistudio_loc = os.path.join(os.getcwd(), PREBLT_TOOLS, "NucleiStudio", "toolchain")
     os.system("pio pkg install -g -t symlink://%s" % (os.path.join(nucleistudio_loc, "gcc")))
     os.system("pio pkg install -g -t symlink://%s" % (os.path.join(nucleistudio_loc, "openocd")))
@@ -187,7 +195,9 @@ def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk
     os.system("pio pkg install -g -t %s" % (nsdk_url))
     print("Install platform nuclei from current folder!")
     os.system("pio pkg install -g -p symlink://%s" % (os.getcwd()))
-    pass
+    print("List installed pio packages")
+    os.system("pio pkg list -g")
+    return True
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Prepare Nuclei Tools and Install PIO Packages.')
