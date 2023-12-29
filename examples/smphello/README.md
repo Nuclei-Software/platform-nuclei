@@ -18,10 +18,10 @@ $ pio run
 $ pio run --target upload
 
 # Build specific environment
-$ pio run -e nuclei-nuclei_fpga_eval
+$ pio run -e nuclei_fpga_eval
 
 # Upload firmware for the specific environment
-$ pio run -e nuclei-nuclei_fpga_eval --target upload
+$ pio run -e nuclei_fpga_eval --target upload
 
 # Clean build files
 $ pio run --target clean
