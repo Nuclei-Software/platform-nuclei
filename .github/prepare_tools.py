@@ -135,7 +135,7 @@ def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Prepare Nuclei Tools and Install PIO Packages.')
-    parser.add_argument('--sdk', "-s", required=True, default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
+    parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
 
     args = parser.parse_args()
 
