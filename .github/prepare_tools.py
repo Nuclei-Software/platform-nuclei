@@ -133,6 +133,7 @@ def setup_nuclei_studio(toolsdir, nuclei_url, system_value, reuse):
     # Copy and modify nuclei_gcc.json
     gcc_json_path = os.path.join(nuclei_folder, "NucleiStudio", "toolchain", "gcc", "package.json")
     modify_json_file(os.path.join(PIOJSONLOC, "gcc.json"), gcc_json_path, system_value)
+    pass
 
 def setup_gd_openocd(toolsdir, gd_openocd_url, system_value, gd_openocd_folder_name, reuse):
     # Download and extract gd32-openocd to a temporary folder
@@ -142,7 +143,9 @@ def setup_gd_openocd(toolsdir, gd_openocd_url, system_value, gd_openocd_folder_n
 
     # Rename the extracted folder to gd_openocd
     renamed_folder = os.path.join(temp_folder, gd_openocd_folder_name)
-    os.rename(os.path.join(temp_folder, os.listdir(temp_folder)[0]), renamed_folder)
+    org_folder = os.path.join(temp_folder, os.listdir(temp_folder)[0])
+    print("Move %s -> %s" % (org_folder, renamed_folder))
+    os.rename(org_folder, renamed_folder)
 
     # Move the renamed folder to NucleiStudio/toolchain/
     destination_folder = os.path.join(tools_folder, "NucleiStudio", "toolchain", gd_openocd_folder_name)
@@ -154,6 +157,7 @@ def setup_gd_openocd(toolsdir, gd_openocd_url, system_value, gd_openocd_folder_n
 
     # Remove the temporary extraction folder
     shutil.rmtree(temp_folder)
+    pass
 
 
 PIOJSONLOC = ".github"
