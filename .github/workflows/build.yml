@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -U https://github.com/platformio/platformio/archive/develop.zip
-          pip install wget
+          pip install wget requests
 
       - name: Caching Nuclei Tools
         uses: actions/cache@v3
