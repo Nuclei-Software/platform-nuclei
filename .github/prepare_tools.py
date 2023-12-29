@@ -139,7 +139,7 @@ def setup_gd_openocd(toolsdir, gd_openocd_url, system_value, gd_openocd_folder_n
     # Download and extract gd32-openocd to a temporary folder
     tools_folder = toolsdir
     temp_folder = os.path.join(tools_folder, "temp_gd_openocd")
-    download_and_extract(gd_openocd_url, temp_folder)
+    download_and_extract(gd_openocd_url, temp_folder, reuse)
 
     # Rename the extracted folder to gd_openocd
     renamed_folder = os.path.join(temp_folder, gd_openocd_folder_name)
@@ -224,6 +224,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     needinstall = True
+    if os.path.isdir(PREBLT_CACHE):
+        print("Prebuilt tool download cache directory existed!")
+        print("Content in this directory: %s" % (os.listdir(PREBLT_CACHE)))
+    else:
+        print("No prebuilt tool download cache found!")
+
     if os.path.isdir(PREBLT_TOOLS):
         needinstall = False
         print("%s existed, maybe tools already installed!" % (PREBLT_TOOLS))
