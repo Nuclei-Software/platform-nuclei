@@ -152,6 +152,6 @@ if __name__ == '__main__':
     else:
         prepare_tools()
     
-    install_pio_packages(args.nsdk)
+    install_pio_packages(args.sdk)
 
     print("Setup completed successfully!")
