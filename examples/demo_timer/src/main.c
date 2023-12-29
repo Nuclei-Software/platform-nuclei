@@ -5,31 +5,18 @@
 #define mtimer_irq_handler     eclic_mtip_handler
 #define mtimer_sw_irq_handler  eclic_msip_handler
 
-static uint32_t int0_cnt = 0;    /* msip timer interrupt test counter */
-static uint32_t int1_cnt = 0;    /* mtip timer interrupt test counter */
-unsigned int msip_trig_flag = 1; /* sw trigger mtimer sw interrupt flag */
+static volatile uint32_t int0_cnt = 0;    /* mtip timer interrupt test counter */
+static volatile uint32_t int1_cnt = 0;    /* msip timer interrupt test counter */
+volatile unsigned int msip_trig_flag = 1; /* sw trigger mtimer sw interrupt flag */
 
-void wait_seconds(size_t n)
-{
-    uint64_t start_mtime, delta_mtime;
-
-    uint64_t tmp = SysTimer_GetLoadValue();
-    do {
-        start_mtime = SysTimer_GetLoadValue();
-    } while (start_mtime == tmp);
-
-    do {
-        delta_mtime = SysTimer_GetLoadValue() - start_mtime;
-    } while (delta_mtime < (n * SOC_TIMER_FREQ));
-}
+#define LOOP_COUNT      5
 
 void mtimer_irq_handler(void)
 {
     int0_cnt++;
-    wait_seconds(1);
     printf("MTimer IRQ handler %d\n\r", int0_cnt);
     uint64_t now = SysTimer_GetLoadValue();
-    SysTimer_SetCompareValue(now + 0.5 * SOC_TIMER_FREQ);
+    SysTimer_SetCompareValue(now + SOC_TIMER_FREQ / 10);
 }
 
 void mtimer_sw_irq_handler(void)
@@ -44,7 +31,7 @@ void setup_timer()
 {
     printf("init timer and start\n\r");
     uint64_t now = SysTimer_GetLoadValue();
-    uint64_t then = now + 0.5 * SOC_TIMER_FREQ;
+    uint64_t then = now + SOC_TIMER_FREQ / 10;
     SysTimer_SetCompareValue(then);
 }
 
@@ -54,27 +41,27 @@ int main(void)
 
     returnCode = ECLIC_Register_IRQ(
                      SysTimer_IRQn, ECLIC_NON_VECTOR_INTERRUPT, ECLIC_LEVEL_TRIGGER, 1, 0,
-                     mtimer_irq_handler); /* register system timer interrupt */
+                     (void *)mtimer_irq_handler); /* register system timer interrupt */
 
     __enable_irq(); /* enable global interrupt */
 
     setup_timer(); /* initialize timer */
 
-    while (int0_cnt < 10);
+    while (int0_cnt < 5);
     ECLIC_DisableIRQ(SysTimer_IRQn); /* Disable MTIP iterrupt */
 
     returnCode = ECLIC_Register_IRQ(
                      SysTimerSW_IRQn, ECLIC_NON_VECTOR_INTERRUPT,
                      ECLIC_POSTIVE_EDGE_TRIGGER, 2, 0,
-                     mtimer_sw_irq_handler); /* register system timer SW interrupt */
+                     (void *)mtimer_sw_irq_handler); /* register system timer SW interrupt */
 
     do {
         if (msip_trig_flag == 1) {
             msip_trig_flag = 0;
             SysTimer_SetSWIRQ(); /* trigger timer sw interrupt */
-            wait_seconds(1);
+            delay_1ms(10);
         }
-    } while (int1_cnt < 10); /* check test end condition */
+    } while (int1_cnt < 5); /* check test end condition */
 
     printf("MTimer msip and mtip interrupt test finish and pass\r\n");
 
@@ -82,7 +69,6 @@ int main(void)
         return -1;
     }
 
-    while (1);
     return 0;
 }
 
