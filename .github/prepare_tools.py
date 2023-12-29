@@ -15,24 +15,28 @@ PREBLT_TOOLS = "prebuilt_tools"
 
 def download_with_progress(url, destination_folder, reuse=False):
     file_name = os.path.join(destination_folder, os.path.basename(urlparse(url).path))
-
     if os.path.isdir(destination_folder) == False:
         os.makedirs(destination_folder)
+
     if reuse == False and os.path.isfile(file_name):
         os.remove(file_name)
     # Download the file with progress bar
     if os.path.isfile(file_name) == False:
         wget.download(url, file_name)
+        print("%s is downloaded!" % (file_name))
+    else:
+        print("%s already downloaded!" % (file_name))
+
+    # Download the file using stream to avoid loading the entire file into memory
+    #with requests.get(url, stream=True) as response:
+    #    with open(file_name, 'wb') as file:
+    #        shutil.copyfileobj(response.raw, file)
 
     return file_name
 
 def download_and_extract(url, extract_folder, reuse=False):
     print("Downloading %s" % (url))
     file_name = download_with_progress(url, PREBLT_CACHE, reuse)
-    # Download the file using stream to avoid loading the entire file into memory
-    #with requests.get(url, stream=True) as response:
-    #    with open(file_name, 'wb') as file:
-    #        shutil.copyfileobj(response.raw, file)
 
     if os.path.isdir(extract_folder) == False:
         os.makedirs(extract_folder)
@@ -49,6 +53,7 @@ def download_and_extract(url, extract_folder, reuse=False):
     # Remove the temporary file
     if reuse == False and os.path.isfile(file_name):
         os.remove(file_name)
+    pass
 
 def modify_json_file(old_file, file_path, system_value):
     # Read the existing JSON file
@@ -107,15 +112,17 @@ gd_openocd_win_url = "https://download.nucleisys.com/upload/files/toochain/openo
 nuclei_linux_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202310-lin64.tgz"
 gd_openocd_linux_url = "https://download.nucleisys.com/upload/files/toochain/openocd/gd32-openocd-0.11.0-3-linux-x64.tar.gz"
 
+REUSE_ARCHIVE = True
+
 def prepare_tools():
     if platform.system() == "Windows":
         # Windows Setup
-        setup_nuclei_studio(PREBLT_TOOLS, nuclei_win_url, ["windows_amd64"], True)
-        setup_gd_openocd(PREBLT_TOOLS, gd_openocd_win_url, ["windows_amd64"], "gd_openocd", True)
+        setup_nuclei_studio(PREBLT_TOOLS, nuclei_win_url, ["windows_amd64"], REUSE_ARCHIVE)
+        setup_gd_openocd(PREBLT_TOOLS, gd_openocd_win_url, ["windows_amd64"], "gd_openocd", REUSE_ARCHIVE)
     elif platform.system() == "Linux":
         # Linux Setup
-        setup_nuclei_studio(PREBLT_TOOLS, nuclei_linux_url, ["linux_x86_64"], True)
-        setup_gd_openocd(PREBLT_TOOLS, gd_openocd_linux_url, ["linux_x86_64"], "gd_openocd", True)
+        setup_nuclei_studio(PREBLT_TOOLS, nuclei_linux_url, ["linux_x86_64"], REUSE_ARCHIVE)
+        setup_gd_openocd(PREBLT_TOOLS, gd_openocd_linux_url, ["linux_x86_64"], "gd_openocd", REUSE_ARCHIVE)
 
     pass
 
