@@ -5,13 +5,28 @@ import tarfile
 import shutil
 import json
 import requests
-import wget  # Import the wget library
 from urllib.parse import urlparse
 import argparse
+try:
+    import wget  # Import the wget library
+    NOWGET = False
+except:
+    NOWGET = True
+    pass
 
 PIOJSONLOC = ""
 PREBLT_CACHE = "prebuilt_dlcache"
 PREBLT_TOOLS = "prebuilt_tools"
+
+def download_file(url, file_name):
+    if NOWGET:
+        # Download the file using stream to avoid loading the entire file into memory
+        with requests.get(url, stream=True) as response:
+            with open(file_name, 'wb') as file:
+                shutil.copyfileobj(response.raw, file)
+    else:
+        wget.download(url, file_name)
+    pass
 
 def download_with_progress(url, destination_folder, reuse=False):
     file_name = os.path.join(destination_folder, os.path.basename(urlparse(url).path))
@@ -22,15 +37,10 @@ def download_with_progress(url, destination_folder, reuse=False):
         os.remove(file_name)
     # Download the file with progress bar
     if os.path.isfile(file_name) == False:
-        wget.download(url, file_name)
+        download_file(url, file_name)
         print("%s is downloaded!" % (file_name))
     else:
         print("%s already downloaded!" % (file_name))
-
-    # Download the file using stream to avoid loading the entire file into memory
-    #with requests.get(url, stream=True) as response:
-    #    with open(file_name, 'wb') as file:
-    #        shutil.copyfileobj(response.raw, file)
 
     return file_name
 
@@ -127,7 +137,6 @@ def prepare_tools():
     pass
 
 def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x"):
-    print("Install pio required packages")
     if os.path.isfile("platform.py") == False:
         print("Not in platform nuclei folder, exit")
         return
@@ -144,6 +153,7 @@ def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Prepare Nuclei Tools and Install PIO Packages.')
     parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
+    parser.add_argument('--pio', action='store_true', help="Setup PIO Package")
 
     args = parser.parse_args()
 
@@ -151,7 +161,10 @@ if __name__ == '__main__':
         print("%s existed, maybe tools already installed!" % (PREBLT_TOOLS))
     else:
         prepare_tools()
-    
-    install_pio_packages(args.sdk)
+
+    if args.pio:
+        print("Install pio required packages")
+        install_pio_packages(args.sdk)
 
     print("Setup completed successfully!")
+    sys.exit(0)

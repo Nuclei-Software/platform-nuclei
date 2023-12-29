@@ -29,9 +29,9 @@ jobs:
           path: prebuilt_dlcache
           key: build
 
-      - name: Install Nuclei Tools and PIO Packages
+      - name: Install and Setup Nuclei Tools
         run: |
-          python3 .github/prepare_tools.py
+          python3 -u .github/prepare_tools.py
 
       - name: Upload cached packages
         uses: actions/upload-artifact@v3
@@ -39,6 +39,10 @@ jobs:
           name: prebuilt_caching
           path: |
             prebuilt_dlcache
+
+      - name: Setup PIO Packages
+        run: |
+          python3 -u .github/prepare_tools.py --pio
 
       - name: Build examples
         run: |
