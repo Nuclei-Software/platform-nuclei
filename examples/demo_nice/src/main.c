@@ -4,6 +4,7 @@
 
 int main(void)
 {
+    int ret = 0;
     unsigned int array[ROW_LEN][COL_LEN] = {
         {10, 30, 90},
         {20, 40, 80},
@@ -13,10 +14,10 @@ int main(void)
     unsigned int row_sum_ref[ROW_LEN] = {0};
     unsigned int col_sum_nice[COL_LEN] = {0};
     unsigned int row_sum_nice[ROW_LEN] = {0};
-    unsigned int begin_instret, end_instret, instret_normal, instret_nice;
-    unsigned int begin_cycle, end_cycle, cycle_normal, cycle_nice;
+    unsigned long begin_instret, end_instret, instret_normal, instret_nice;
+    unsigned long begin_cycle, end_cycle, cycle_normal, cycle_nice;
 
-    __RV_CSR_WRITE(CSR_MSTATUS, MSTATUS_XS);
+    __RV_CSR_SET(CSR_MSTATUS, MSTATUS_XS);
     __enable_minstret_counter();
     __enable_mcycle_counter();
 
@@ -63,14 +64,15 @@ int main(void)
         printf("PASS\r\n");
     } else {
         printf("FAIL\r\n");
+        ret = 1;
     }
 
     printf("4. Performance summary\r\n");
 
     printf("\t normal: \r\n");
-    printf("\t      instret: %u, cycle: %u\r\n", instret_normal, cycle_normal);
+    printf("\t      instret: %lu, cycle: %lu\r\n", instret_normal, cycle_normal);
     printf("\t nice  : \r\n");
-    printf("\t      instret: %u, cycle: %u\r\n", instret_nice, cycle_nice);
+    printf("\t      instret: %lu, cycle: %lu\r\n", instret_nice, cycle_nice);
 
-    return 0;
+    return ret;
 }

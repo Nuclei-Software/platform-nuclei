@@ -83,17 +83,34 @@ void print_misa(void)
     printf("MISA: RV%s\r\n", misa_chars);
 }
 
+#ifndef CFG_SIMULATION
+#define RUN_LOOPS   20
+#else
+#define RUN_LOOPS   5
+#endif
+
 int main(void)
 {
-    srand(__get_rv_cycle()  | __get_rv_instret() | __RV_CSR_READ(CSR_MCYCLE));
-    uint32_t rval = rand();
-    rv_csr_t misa = __RV_CSR_READ(CSR_MISA);
+    uint32_t rval, seed;
+    unsigned long hartid, clusterid;
+    rv_csr_t misa;
 
-    printf("MISA: 0x%lx\r\n", misa);
+    // get hart id of current cluster
+    hartid = __get_hart_id();
+    clusterid = __get_cluster_id();
+    misa = __RV_CSR_READ(CSR_MISA);
+
+    printf("Cluster %lu, Hart %lu, MISA: 0x%lx\r\n", clusterid, hartid, misa);
     print_misa();
 
-    for (int i = 0; i < 20; i ++) {
-        printf("%d: Hello World From Nuclei RISC-V Processor!\r\n", i);
+    // Generate random value with seed
+    seed = (uint32_t)(__get_rv_cycle()  | __get_rv_instret() | __RV_CSR_READ(CSR_MCYCLE));
+    srand(seed);
+    rval = rand();
+    printf("Got rand integer %d using seed %d.\r\n", seed, rval);
+
+    for (unsigned long i = 0; i < RUN_LOOPS; i ++) {
+        printf("%lu: Hello World From Nuclei RISC-V Processor!\r\n", i);
     }
 
     return 0;
