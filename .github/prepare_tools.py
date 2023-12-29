@@ -114,13 +114,15 @@ def setup_nuclei_studio(toolsdir, nuclei_url, system_value, reuse):
 
     # Fix nuclei studio path
     for item in os.listdir(nuclei_folder):
-        if os.path.isdir(item) and item.startswith("NucleiStudio") and item != "NucleiStudio":
+        itemdir = os.path.join(nuclei_folder, item)
+        if os.path.isdir(itemdir) and item.startswith("NucleiStudio") and item != "NucleiStudio":
             nsidepath = os.path.join(nuclei_folder, item)
             newpath = os.path.join(nuclei_folder, "NucleiStudio")
             if len(os.listdir(nsidepath)) == 1:
                 nsidepath = os.path.join(nsidepath, "NucleiStudio")
             # rename old ide path to new ide path
             # such as NucleiStudio_IDE_202310/NucleiStudio -> NucleiStudio
+            print("Move %s -> %s" % (nsidepath, newpath))
             os.rename(nsidepath, newpath)
             break
 
