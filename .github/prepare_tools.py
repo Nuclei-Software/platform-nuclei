@@ -164,15 +164,22 @@ gd_openocd_linux_url = "https://download.nucleisys.com/upload/files/toochain/ope
 REUSE_ARCHIVE = True
 
 def prepare_tools():
-    if platform.system() == "Windows":
+    ostype = platform.system()
+    print("Setup Tools for %s" % (ostype))
+    if platform.architecture()[0] != '64bit':
+        print("ERROR: Currently only support 64bit OS!")
+        sys.exit(1)
+    if ostype == "Windows":
         # Windows Setup
         setup_nuclei_studio(PREBLT_TOOLS, nuclei_win_url, ["windows_amd64"], REUSE_ARCHIVE)
         setup_gd_openocd(PREBLT_TOOLS, gd_openocd_win_url, ["windows_amd64"], "gd_openocd", REUSE_ARCHIVE)
-    elif platform.system() == "Linux":
+    elif ostype == "Linux":
         # Linux Setup
         setup_nuclei_studio(PREBLT_TOOLS, nuclei_linux_url, ["linux_x86_64"], REUSE_ARCHIVE)
         setup_gd_openocd(PREBLT_TOOLS, gd_openocd_linux_url, ["linux_x86_64"], "gd_openocd", REUSE_ARCHIVE)
-
+    else:
+        print("ERROR: Unsupported OS")
+        sys.exit(1)
     pass
 
 def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x"):
@@ -201,14 +208,22 @@ def install_pio_packages(nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Prepare Nuclei Tools and Install PIO Packages.')
-    parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
+    parser.add_argument('--install', action='store_true', help="Always install required tools")
     parser.add_argument('--pio', action='store_true', help="Setup PIO Package")
+    parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
 
     args = parser.parse_args()
 
+    needinstall = True
     if os.path.isdir(PREBLT_TOOLS):
+        needinstall = False
         print("%s existed, maybe tools already installed!" % (PREBLT_TOOLS))
-    else:
+        if args.install:
+            print("Remove and reinstall %s" % (PREBLT_TOOLS))
+            shutil.rmtree(PREBLT_TOOLS)
+            needinstall = True
+
+    if needinstall:
         prepare_tools()
 
     if args.pio:

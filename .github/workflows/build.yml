@@ -31,7 +31,7 @@ jobs:
 
       - name: Install and Setup Nuclei Tools
         run: |
-          python3 -u .github/prepare_tools.py
+          python3 -u .github/prepare_tools.py --install
 
       - name: Upload cached packages
         uses: actions/upload-artifact@v3
@@ -46,4 +46,4 @@ jobs:
 
       - name: Build examples
         run: |
-          python3 .github/build_examples.py
+          python3 -u .github/build_examples.py
