@@ -23,15 +23,22 @@ jobs:
           pip install -U https://github.com/platformio/platformio/archive/develop.zip
           pip install wget
 
-      - name: Install Nuclei Tools and PIO Packages
-        run: |
-          python3 .github/prepare_tools.py
-
       - name: Caching Nuclei Tools
         uses: actions/cache@v3
         with:
           path: prebuilt_dlcache
           key: build
+
+      - name: Install Nuclei Tools and PIO Packages
+        run: |
+          python3 .github/prepare_tools.py
+
+      - name: Upload cached packages
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilt_caching
+          path: |
+            prebuilt_dlcache
 
       - name: Build examples
         run: |
