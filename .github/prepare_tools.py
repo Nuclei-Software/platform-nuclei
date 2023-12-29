@@ -172,7 +172,7 @@ def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse):
     # Rename the old openocd folder to gd_openocd
     if os.path.isdir(destination_folder) == False:
         print("Copy %s -> %s" % (org_folder, destination_folder))
-        shutil.copy(org_folder, destination_folder)
+        shutil.copytree(org_folder, destination_folder)
     else:
         print("%s already exist!" % (destination_folder))
     
