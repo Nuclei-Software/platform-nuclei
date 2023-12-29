@@ -45,8 +45,8 @@ def md5sum_file(file_path):
     if os.path.isfile(file_path) == False:
         print("{file_path} not existed!")
         return False
-    print("{file_path} size %s bytes" % (get_file_size(file_path)))
-    print("{file_path} md5 %s" % (calculate_md5(file_path)))
+    print(f"{file_path} size %s bytes" % (get_file_size(file_path)))
+    print(f"{file_path} md5 %s" % (calculate_md5(file_path)))
     return True
 
 def download_with_progress(url, destination_folder, reuse=False):
@@ -76,11 +76,11 @@ def download_and_extract(url, extract_folder, reuse=False):
     print("Extracting %s to %s" % (file_name, extract_folder))
     # Extract the contents
     if file_name.endswith(".zip"):
-        print("Unzip {file_name}")
+        print(f"Unzip {file_name}")
         with zipfile.ZipFile(file_name, "r") as zip_ref:
             zip_ref.extractall(extract_folder)
     elif file_name.endswith(".tar.gz") or file_name.endswith(".tgz"):
-        print("Untar {file_name}")
+        print(f"Untar {file_name}")
         with tarfile.open(file_name, "r:gz") as tar_ref:
             tar_ref.extractall(extract_folder)
     else:
@@ -111,6 +111,18 @@ def setup_nuclei_studio(toolsdir, nuclei_url, system_value, reuse):
     # Download and extract NucleiStudio
     nuclei_folder = toolsdir
     download_and_extract(nuclei_url, nuclei_folder, reuse)
+
+    # Fix nuclei studio path
+    for item in os.listdir(nuclei_folder):
+        if os.path.isdir(item) and item.startswith("NucleiStudio") and item != "NucleiStudio":
+            nsidepath = os.path.join(nuclei_folder, item)
+            newpath = os.path.join(nuclei_folder, "NucleiStudio")
+            if len(os.listdir(nsidepath)) == 1:
+                nsidepath = os.path.join(nsidepath, "NucleiStudio")
+            # rename old ide path to new ide path
+            # such as NucleiStudio_IDE_202310/NucleiStudio -> NucleiStudio
+            os.rename(nsidepath, newpath)
+            break
 
     # Copy and modify nuclei_openocd.json
     openocd_json_path = os.path.join(nuclei_folder, "NucleiStudio", "toolchain", "openocd", "package.json")
