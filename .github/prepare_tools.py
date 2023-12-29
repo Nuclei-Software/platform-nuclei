@@ -76,11 +76,15 @@ def download_and_extract(url, extract_folder, reuse=False):
     print("Extracting %s to %s" % (file_name, extract_folder))
     # Extract the contents
     if file_name.endswith(".zip"):
+        print("Unzip {file_name}")
         with zipfile.ZipFile(file_name, "r") as zip_ref:
             zip_ref.extractall(extract_folder)
-    elif file_name.endswith(".tar.gz"):
+    elif file_name.endswith(".tar.gz") or file_name.endswith(".tgz"):
+        print("Untar {file_name}")
         with tarfile.open(file_name, "r:gz") as tar_ref:
             tar_ref.extractall(extract_folder)
+    else:
+        print("Unsupported archive file %s" % (file_name))
 
     print("List in this directory %s: %s" %(extract_folder, os.listdir(extract_folder)))
     # Remove the temporary file
