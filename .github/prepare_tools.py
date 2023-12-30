@@ -167,7 +167,7 @@ def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse):
     else:
         org_folder = gd_openocd_uri
     if os.path.isdir(os.path.join(org_folder, "scripts")) == False:
-        print("This may not be a valid openocd package!" % (org_folder))
+        print("This %s may not be a valid openocd package!" % (org_folder))
         sys.exit(1)
     # Rename the old openocd folder to gd_openocd
     if os.path.isdir(destination_folder) == False:
@@ -190,13 +190,12 @@ PIOJSONLOC = ".github"
 REUSE_ARCHIVE = True
 
 def is_valid_url(url):
-    if not url:
-        return False
     try:
-        result = urlparse(url)
-        return True
+        if url and urlparse(url).netloc != "":
+            return True
     except:
-        return False
+        pass
+    return False
 
 def prepare_tools(prebltloc=PREBLT_TOOLS, nside=None, gdocd=None):
     ostype = platform.system()
