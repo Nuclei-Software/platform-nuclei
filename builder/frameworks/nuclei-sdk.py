@@ -78,6 +78,14 @@ def parse_nuclei_predefined_cores(core_mk):
                 core_arch_abis[core_lower] = (matches.groups()[1:])
     return core_arch_abis
 
+def find_suitable_download(download, download_modes):
+    if download_modes and type(download_modes) == list and len(download_modes) > 1:
+        if download not in download_modes:
+            print("DOWNLOAD MODE is %s, not supported in %s" % (download, download_modes))
+            download = download_modes[0]
+            print("Change to use DOWNLOAD MODE %s now!!!!!" % (download))
+    return download
+
 def find_suitable_ldscript(soc, board, download, variant=""):
     soc_variant = soc
     if board == "gd32vf103c_longan_nano":
@@ -145,6 +153,7 @@ build_rtthread_msh = board.get("build.rtthread_msh", "").lower().strip()
 build_variant = board.get("build.variant", "").lower().strip()
 build_toolchain = board.get("build.toolchain", "").lower().strip()
 build_download = board.get("build.download", "").lower().strip()
+build_download_modes = board.get("build.download_modes", [])
 build_stdclib = board.get("build.stdclib", "newlib_small").lower().strip()
 build_simu = board.get("build.simu", "").lower().strip()
 build_ncrtio = board.get("build.ncrtio", "uart").lower().strip()
@@ -162,6 +171,8 @@ build_clksrc = board.get("build.clksrc", "").lower().strip()
 build_hxtal_value = board.get("build.hxtal_value", "").lower().strip()
 
 selected_rtos = select_rtos_package(build_rtos)
+
+build_download = find_suitable_download(build_download, build_download_modes)
 
 if not build_ldscript:
     build_ldscript = find_suitable_ldscript(build_soc, build_board, build_download, build_variant)
