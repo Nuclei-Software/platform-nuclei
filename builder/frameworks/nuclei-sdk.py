@@ -126,18 +126,17 @@ core_arch_abis = parse_nuclei_predefined_cores(FRAMEWORK_NUCLEI_SOC_CORES_MK)
 build_soc = board.get("build.soc", "").strip()
 
 if not build_soc:
-    sys.stderr.write(
-        "build.soc is not defined in board description json file %s.json, please check!" % (build_board))
+    print("Error! build.soc is not defined in board description json file %s.json, please check!" % (build_board))
     env.Exit(1)
 
 # Check whether soc is supported by this nuclei sdk
 if build_soc in ("hbird", "demosoc"):
     if not is_valid_soc(build_soc):
-        print("%s SoC is deprecated, please use evalsoc instead!" %(build_soc))
+        print("Warning! %s SoC is deprecated, please use evalsoc instead!" %(build_soc))
         build_soc = "evalsoc"
 
 if not is_valid_soc(build_soc):
-    sys.stderr.write("Could not find SoC software package for SoC %s" % build_soc)
+    print("Error! Could not find SoC software package for SoC %s" % build_soc)
     env.Exit(1)
 
 build_core = board.get("build.core", "").lower().strip()

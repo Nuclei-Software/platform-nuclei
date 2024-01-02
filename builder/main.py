@@ -178,7 +178,7 @@ elif upload_protocol == "custom":
     upload_actions = [env.VerboseAction("$UPLOADCMD", "Uploading $SOURCE")]
 
 else:
-    sys.stderr.write("Warning! Unknown upload protocol %s\n" % upload_protocol)
+    print("Warning! Unknown upload protocol %s\n" % upload_protocol)
 
 AlwaysBuild(env.Alias("upload", upload_target, upload_actions))
 
