@@ -40,21 +40,6 @@ assert isdir(FRAMEWORK_DIR)
 def is_valid_soc(soc):
     return isdir(join(FRAMEWORK_DIR, "SoC", soc))
 
-def get_inc_dirs(path):
-    incdirs = []
-    if isdir(path):
-        for dir in listdir(path):
-            dir_path = join(path, dir)
-            if isdir(dir_path):
-                incdirs.append(dir_path)
-    return incdirs
-
-def get_soc_board_incdirs(soc, board):
-    soc_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Common", "Include")
-    board_inc_dir_root = join(FRAMEWORK_DIR, "SoC", soc, "Board", board, "Include")
-
-    return [soc_inc_dir_root, board_inc_dir_root]
-
 def select_rtos_package(build_rtos):
     SUPPORTED_RTOSES = ("FreeRTOS", "UCOSII", "RTThread")
     selected_rtos = None
@@ -86,7 +71,7 @@ def find_suitable_download(download, download_modes):
             print("Change to use DOWNLOAD MODE %s now!!!!!" % (download))
     return download
 
-def find_suitable_ldscript(soc, board, download, variant=""):
+def find_suitable_ldscript(socdir, soc, board, download, variant=""):
     soc_variant = soc
     if board == "gd32vf103c_longan_nano":
         soc_variant = "gd32vf103x8" if variant == "lite" else "gd32vf103xb"
@@ -96,7 +81,7 @@ def find_suitable_ldscript(soc, board, download, variant=""):
     else:
         ld_script = "gcc_%s.ld" % build_soc
 
-    build_ldscript = join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Source", "GCC", ld_script)
+    build_ldscript = join(socdir, "Board", build_board, "Source", "GCC", ld_script)
     return build_ldscript
 
 def find_arch_abi_tune_cmodel(core, arch, abi, tune, cmodel, splist):
@@ -135,9 +120,24 @@ if build_soc in ("hbird", "demosoc"):
         print("Warning! %s SoC is deprecated, please use evalsoc instead!" %(build_soc))
         build_soc = "evalsoc"
 
+FRAMEWORK_SOC_DIR = ""
 if not is_valid_soc(build_soc):
-    print("Error! Could not find SoC software package for SoC %s" % build_soc)
-    env.Exit(1)
+    print("Warning! Could not find %s SoC support package in framework-nuclei-sdk" % build_soc)
+    soc_framework_pkg = "framework-nuclei-sdk-%s" % build_soc
+    try:
+        # you can add an extra platform_packages see https://docs.platformio.org/en/latest/projectconf/sections/env/options/platform/platform_packages.html
+        print("Try to find SoC support package from pio package %s, assume it is provided!" % (soc_framework_pkg))
+        FRAMEWORK_SOC_DIR = env.PioPlatform().get_package_dir(soc_framework_pkg)
+        print("Using SoC support package source code from %s" % (soc_framework_pkg))
+    except KeyError:
+        print("Error! If you confirm this pio package %s existed, please install it!" % (soc_framework_pkg))
+        env.Exit(1)
+
+# Set Nuclei SDK Root directory
+build_nsdk_dir = FRAMEWORK_DIR
+build_nsdk_socdir = os.path.join(FRAMEWORK_DIR, "SoC", build_soc)
+if FRAMEWORK_SOC_DIR != "":
+    build_nsdk_socdir = FRAMEWORK_SOC_DIR
 
 build_core = board.get("build.core", "").lower().strip()
 build_arch_ext = board.get("build.arch_ext", "").lower().strip()
@@ -174,7 +174,7 @@ selected_rtos = select_rtos_package(build_rtos)
 build_download = find_suitable_download(build_download, build_download_modes)
 
 if not build_ldscript:
-    build_ldscript = find_suitable_ldscript(build_soc, build_board, build_download, build_variant)
+    build_ldscript = find_suitable_ldscript(build_nsdk_socdir, build_soc, build_board, build_download, build_variant)
 
 build_march, build_mabi, build_mtune, build_mcmodel = find_arch_abi_tune_cmodel(build_core, build_march, build_mabi, build_mtune, build_mcmodel, core_arch_abis)
 
@@ -208,9 +208,9 @@ build_ldflags = [
 
 build_cppdefines = []
 build_cpppaths = [
-    "$PROJECT_SRC_DIR", "$PROJECT_INCLUDE_DIR", join(FRAMEWORK_DIR, "NMSIS", "Core", "Include"),
-    join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include"),
-    join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board, "Include")]
+    "$PROJECT_SRC_DIR", "$PROJECT_INCLUDE_DIR", join(build_nsdk_dir, "NMSIS", "Core", "Include"),
+    join(build_nsdk_socdir, "Common", "Include"),
+    join(build_nsdk_socdir, "Board", build_board, "Include")]
 build_libpaths = []
 build_libs = []
 
@@ -254,13 +254,13 @@ if build_nmsis_lib:
         libname = "nmsis_%s" % (lib)
         if libname in sel_nmsis_libs:
             build_libs.extend(["%s_%s" % (libname, build_nmsis_lib_arch)])
-            build_libpaths.extend([join(FRAMEWORK_DIR, "NMSIS", "Library", lib.upper(), "GCC")])
-            build_cpppaths.extend([join(FRAMEWORK_DIR, "NMSIS", lib.upper(), "Include")])
+            build_libpaths.extend([join(build_nsdk_dir, "NMSIS", "Library", lib.upper(), "GCC")])
+            build_cpppaths.extend([join(build_nsdk_dir, "NMSIS", lib.upper(), "Include")])
             if lib == "dsp":
-                build_cpppaths.extend([join(FRAMEWORK_DIR, "NMSIS", lib.upper(), "PrivateInclude")])
+                build_cpppaths.extend([join(build_nsdk_dir, "NMSIS", lib.upper(), "PrivateInclude")])
 
 if build_soc == "gd32vf103" and build_usb_driver != "":
-    build_cpppaths.extend([join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Include", "Usb")])
+    build_cpppaths.extend([join(build_nsdk_socdir, "Common", "Include", "Usb")])
 
 if build_simu:
     build_cppdefines.extend([("SIMULATION_MODE", "SIMULATION_MODE_%s" % (build_simu.upper()))])
@@ -329,12 +329,12 @@ boardlibname = "board_" + build_board
 libs = [
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, soclibname),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Common"),
+        join(build_nsdk_socdir, "Common"),
         src_filter="+<*> -<**/IAR/> -<**/Stubs/> -<**/Usb/> +<**/%s/>" % (stubname)
     ),
     env.BuildLibrary(
         join("$BUILD_DIR", "SoC", build_soc, "Board", boardlibname),
-        join(FRAMEWORK_DIR, "SoC", build_soc, "Board", build_board),
+        join(build_nsdk_socdir, "Board", build_board),
         src_filter="+<*> -<**/IAR/>"
     )
 ]
@@ -342,45 +342,45 @@ libs = [
 if selected_rtos == "FreeRTOS":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "FreeRTOS"),
-        join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source"),
+        join(build_nsdk_dir, "OS", "FreeRTOS", "Source"),
         src_filter="+<*> -<portable/MemMang/> -<portable/IAR/> +<portable/MemMang/heap_4.c>"
     ))
     env.Append(
         CPPPATH = [
-            join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "include"),
-            join(FRAMEWORK_DIR, "OS", "FreeRTOS", "Source", "portable")
+            join(build_nsdk_dir, "OS", "FreeRTOS", "Source", "include"),
+            join(build_nsdk_dir, "OS", "FreeRTOS", "Source", "portable")
         ]
     )
 elif selected_rtos == "UCOSII":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "UCOSII"),
-        join(FRAMEWORK_DIR, "OS", "UCOSII"),
+        join(build_nsdk_dir, "OS", "UCOSII"),
         src_filter="+<*> -<arch/iar/>"
     ))
     env.Append(
         CPPPATH = [
-            join(FRAMEWORK_DIR, "OS", "UCOSII", "arch"),
-            join(FRAMEWORK_DIR, "OS", "UCOSII", "cfg"),
-            join(FRAMEWORK_DIR, "OS", "UCOSII", "source")
+            join(build_nsdk_dir, "OS", "UCOSII", "arch"),
+            join(build_nsdk_dir, "OS", "UCOSII", "cfg"),
+            join(build_nsdk_dir, "OS", "UCOSII", "source")
         ]
     )
 elif selected_rtos == "RTThread":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "RTThread"),
-        join(FRAMEWORK_DIR, "OS", "RTThread"),
+        join(build_nsdk_dir, "OS", "RTThread"),
         src_filter=rtt_srcfilter
     ))
     env.Append(
         CPPPATH = [
-            join(FRAMEWORK_DIR, "OS", "RTThread", "libcpu", "risc-v", "nuclei"),
-            join(FRAMEWORK_DIR, "OS", "RTThread", "include"),
-            join(FRAMEWORK_DIR, "OS", "RTThread", "include", "libc")
+            join(build_nsdk_dir, "OS", "RTThread", "libcpu", "risc-v", "nuclei"),
+            join(build_nsdk_dir, "OS", "RTThread", "include"),
+            join(build_nsdk_dir, "OS", "RTThread", "include", "libc")
             ]
     )
     if build_rtthread_msh == "1":
         env.Append(
             CPPPATH = [
-                join(FRAMEWORK_DIR, "OS", "RTThread", "components", "finsh")
+                join(build_nsdk_dir, "OS", "RTThread", "components", "finsh")
                 ]
         )
 
@@ -396,7 +396,7 @@ if build_soc == "gd32vf103" and build_usb_driver != "":
 
     libs.append(env.BuildLibrary(
             join("$BUILD_DIR", "SoC", build_soc, "%s_usb" %(soclibname)),
-            join(FRAMEWORK_DIR, "SoC", build_soc, "Common", "Source", "Drivers", "Usb"),
+            join(build_nsdk_socdir, "Common", "Source", "Drivers", "Usb"),
             src_filter=usb_srcfilter
         ))
 
