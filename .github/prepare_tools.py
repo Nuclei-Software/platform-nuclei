@@ -172,7 +172,10 @@ def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse, fo
         print("This %s may not be a valid openocd package!" % (org_folder))
         sys.exit(1)
     # Rename the old openocd folder to gd_openocd
-    if os.path.isdir(destination_folder) == False:
+    if os.path.isdir(destination_folder) == False or force == True:
+        if force == True and os.path.isdir(destination_folder):
+            print("Remove existing %s" % (destination_folder))
+            shutil.rmtree(destination_folder)
         print("Copy %s -> %s" % (org_folder, destination_folder))
         shutil.copytree(org_folder, destination_folder)
     else:
