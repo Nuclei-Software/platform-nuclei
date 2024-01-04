@@ -1,6 +1,6 @@
 {
   "name": "toolchain-riscv-nuclei",
-  "version": "13.1.1",
+  "version": "1.0.0",
   "description": "Nuclei RISC-V toolchain",
   "keywords": [
     "build tools",
