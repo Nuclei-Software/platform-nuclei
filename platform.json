@@ -30,7 +30,7 @@
   "packages": {
     "toolchain-riscv-nuclei": {
       "type": "toolchain",
-      "version": "~13.1.1"
+      "version": "~1.0.0"
     },
     "framework-nuclei-sdk": {
       "optional": true,
@@ -40,12 +40,12 @@
     "tool-openocd-nuclei": {
       "optional": true,
       "type": "uploader",
-      "version": "~0.11.0"
+      "version": "~1.0.0"
     },
     "tool-openocd-gd32": {
       "optional": true,
       "type": "uploader",
-      "version": "~0.11.0"
+      "version": "~1.0.0"
     },
     "tool-jlink": {
       "type": "uploader",
