@@ -96,10 +96,12 @@ def download_and_extract(url, extract_folder, reuse=False):
         os.remove(file_name)
     pass
 
-def modify_json_file(old_file, file_path, system_value):
+def modify_json_file(old_file, file_path, system_value, force=False):
     if os.path.isfile(file_path):
         print("%s already existed!" % (file_path))
-        return
+        if force == False:
+            return
+        print("Force reinstall this %s file!")
 
     # Read the existing JSON file
     with open(old_file, "r") as json_file:
@@ -121,7 +123,7 @@ def check_isdir(uri):
     except:
         return False
 
-def setup_nuclei_studio(toolsdir, nuclei_uri, system_value, reuse):
+def setup_nuclei_studio(toolsdir, nuclei_uri, system_value, reuse, force=False):
     if check_isdir(nuclei_uri) == False:
         # Download and extract NucleiStudio
         nuclei_folder = toolsdir
@@ -145,14 +147,14 @@ def setup_nuclei_studio(toolsdir, nuclei_uri, system_value, reuse):
 
     # Copy and modify nuclei_openocd.json
     openocd_json_path = os.path.join(nsideloc, "toolchain", "openocd", "package.json")
-    modify_json_file(os.path.join(PIOJSONLOC, "openocd.json"), openocd_json_path, system_value)
+    modify_json_file(os.path.join(PIOJSONLOC, "openocd.json"), openocd_json_path, system_value, force)
 
     # Copy and modify nuclei_gcc.json
     gcc_json_path = os.path.join(nsideloc, "toolchain", "gcc", "package.json")
-    modify_json_file(os.path.join(PIOJSONLOC, "gcc.json"), gcc_json_path, system_value)
+    modify_json_file(os.path.join(PIOJSONLOC, "gcc.json"), gcc_json_path, system_value, force)
     pass
 
-def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse):
+def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse, force=False):
     gd_openocd_folder_name = "gd_openocd"
     destination_folder = os.path.join(nsideloc, "toolchain", gd_openocd_folder_name)
     temp_folder = None
@@ -182,7 +184,7 @@ def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse):
 
     # Copy and modify gd_openocd.json
     gd_openocd_json_path = os.path.join(destination_folder, "package.json")
-    modify_json_file(os.path.join(PIOJSONLOC, "gd_openocd.json"), gd_openocd_json_path, system_value)
+    modify_json_file(os.path.join(PIOJSONLOC, "gd_openocd.json"), gd_openocd_json_path, system_value, force)
     pass
 
 
@@ -197,7 +199,7 @@ def is_valid_url(url):
         pass
     return False
 
-def prepare_tools(prebltloc=PREBLT_TOOLS, nside=None, gdocd=None):
+def prepare_tools(prebltloc=PREBLT_TOOLS, nside=None, gdocd=None, force=False):
     ostype = platform.system()
     print("Setup Tools for %s" % (ostype))
     if platform.architecture()[0] != '64bit':
@@ -243,8 +245,8 @@ def prepare_tools(prebltloc=PREBLT_TOOLS, nside=None, gdocd=None):
         print("INFO: Using a different url %s to download gd32 openocd!" % (gdocd))
         gdocd_uri = nside
 
-    setup_nuclei_studio(prebltloc, nside_uri, supported_oses, REUSE_ARCHIVE)
-    setup_gd_openocd(prebltloc, gdocd_uri, supported_oses, nsideloc, REUSE_ARCHIVE)
+    setup_nuclei_studio(prebltloc, nside_uri, supported_oses, REUSE_ARCHIVE, force)
+    setup_gd_openocd(prebltloc, gdocd_uri, supported_oses, nsideloc, REUSE_ARCHIVE, force)
     pass
 
 def get_nside_loc(prebltloc=PREBLT_TOOLS, nside=None):
@@ -295,6 +297,7 @@ if __name__ == '__main__':
     parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
     parser.add_argument('--ide', help='Nuclei Studio IDE PATH, such as C:\\Software\\NucleiStudio')
     parser.add_argument('--gdocd', help='GD OpenOCD PATH, such as C:\\Work\\openocd_v1.2.2\\xpack-openocd-0.11.0-3')
+    parser.add_argument('--force', action='store_true', help='Force reinstall the package.json file if existed!')
 
     args = parser.parse_args()
 
@@ -315,7 +318,7 @@ if __name__ == '__main__':
             needinstall = True
 
     if needinstall:
-        prepare_tools(prebuiltloc, args.ide, args.gdocd)
+        prepare_tools(prebuiltloc, args.ide, args.gdocd, args.force)
 
     nsideloc = get_nside_loc(prebuiltloc, args.ide)
     if args.pio:
