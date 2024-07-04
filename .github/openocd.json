@@ -1,6 +1,6 @@
 {
   "name": "tool-openocd-nuclei",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Open On-Chip Debugger branch with RISC-V Nuclei support",
   "keywords": [
     "tools",
