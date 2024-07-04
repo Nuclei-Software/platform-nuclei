@@ -290,6 +290,9 @@ if build_clksrc:
 if build_hxtal_value:
     build_cppdefines.extend([("HXTAL_VALUE", build_hxtal_value)])
 
+# NOTE: Search linker script include directory since nuclei sdk 0.6.0
+build_ldflags.extend(["-L", "%s" % (os.path.dirname(build_ldscript))])
+
 # WORKAROUND: If RT-Thread used, force it to include symbols from finsh
 # otherwise it will not be included
 if build_rtthread_msh == "1": # RT-Thread MSH compoment selected
@@ -387,7 +390,7 @@ elif selected_rtos == "ThreadX":
     libs.append(env.BuildLibrary(
         join("$BUILD_DIR", "RTOS", "ThreadX"),
         join(build_nsdk_dir, "OS", "ThreadX"),
-        src_filter="+<*> -<iar/>"
+        src_filter="+<*> -<**/iar/>"
     ))
     env.Append(
         CPPPATH = [
