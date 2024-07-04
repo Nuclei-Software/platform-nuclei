@@ -41,7 +41,7 @@ def is_valid_soc(soc):
     return isdir(join(FRAMEWORK_DIR, "SoC", soc))
 
 def select_rtos_package(build_rtos):
-    SUPPORTED_RTOSES = ("FreeRTOS", "UCOSII", "RTThread")
+    SUPPORTED_RTOSES = ("FreeRTOS", "UCOSII", "RTThread", "ThreadX")
     selected_rtos = None
     build_rtos = build_rtos.strip().lower()
     for rtos in SUPPORTED_RTOSES:
@@ -383,6 +383,18 @@ elif selected_rtos == "RTThread":
                 join(build_nsdk_dir, "OS", "RTThread", "components", "finsh")
                 ]
         )
+elif selected_rtos == "ThreadX":
+    libs.append(env.BuildLibrary(
+        join("$BUILD_DIR", "RTOS", "ThreadX"),
+        join(build_nsdk_dir, "OS", "ThreadX"),
+        src_filter="+<*> -<iar/>"
+    ))
+    env.Append(
+        CPPPATH = [
+            join(build_nsdk_dir, "OS", "ThreadX", "common", "inc"),
+            join(build_nsdk_dir, "OS", "ThreadX", "ports", "nuclei")
+        ]
+    )
 
 # process usb library
 if build_soc == "gd32vf103" and build_usb_driver != "":
