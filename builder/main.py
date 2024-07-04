@@ -160,11 +160,8 @@ elif upload_protocol in debug_tools:
             "-c", "reset halt; ",
             "-c", "program {$SOURCE} verify; reset halt; resume; shutdown;"
         ])
-    # TODO workaround for gd32vw553h_eval board, we need to use gd32 distributed openocd
-    if build_board == "gd32vw553h_eval":
-        openocd_dir = platform.get_package_dir("tool-openocd-gd32")
-    else:
-        openocd_dir = platform.get_package_dir("tool-openocd-nuclei")
+    # TODO You must use Nuclei OpenOCD >= 2024.06
+    openocd_dir = platform.get_package_dir("tool-openocd-nuclei")
     openocd_exe = join(openocd_dir, "bin", "openocd")
 
     env.Replace(

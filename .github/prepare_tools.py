@@ -155,6 +155,9 @@ def setup_nuclei_studio(toolsdir, nuclei_uri, system_value, reuse, force=False):
     pass
 
 def setup_gd_openocd(toolsdir, gd_openocd_uri, system_value, nsideloc, reuse, force=False):
+    if gd_openocd_uri == "" or os.path.isfile(os.path.join(PIOJSONLOC, "gd_openocd.json")) == False:
+        print("Ignore setup for gd openocd, maybe latest nuclei openocd already merged support for gd openocd!")
+        return
     gd_openocd_folder_name = "gd_openocd"
     destination_folder = os.path.join(nsideloc, "toolchain", gd_openocd_folder_name)
     temp_folder = None
@@ -211,10 +214,10 @@ def prepare_tools(prebltloc=PREBLT_TOOLS, nside=None, gdocd=None, force=False):
     # if you provide a real installed nuclei studio path
     nsideloc = os.path.join(prebltloc, "NucleiStudio")
     # you can customize the url to your own url
-    nuclei_win_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202310-win64.zip"
-    gd_openocd_win_url = "https://download.nucleisys.com/upload/files/toochain/openocd/gd32-openocd-0.11.0-3-win32-x64.zip"
-    nuclei_linux_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202310-lin64.tgz"
-    gd_openocd_linux_url = "https://download.nucleisys.com/upload/files/toochain/openocd/gd32-openocd-0.11.0-3-linux-x64.tar.gz"
+    nuclei_win_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202406-win64.zip"
+    gd_openocd_win_url = ""
+    nuclei_linux_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202406-lin64.tgz"
+    gd_openocd_linux_url = ""
 
     nside_uri = None
     gdocd_uri = None
@@ -258,7 +261,7 @@ def get_nside_loc(prebltloc=PREBLT_TOOLS, nside=None):
     return os.path.join(prebltloc, "NucleiStudio")
 
 
-def install_pio_packages(nsideloc=os.path.join(os.getcwd(), PREBLT_TOOLS, "NucleiStudio"), nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x"):
+def install_pio_packages(nsideloc=os.path.join(os.getcwd(), PREBLT_TOOLS, "NucleiStudio"), nsdk_url="https://github.com/Nuclei-Software/nuclei-sdk"):
     if os.path.isfile("platform.py") == False:
         print("Not in platform nuclei folder, exit")
         return False
@@ -278,7 +281,8 @@ def install_pio_packages(nsideloc=os.path.join(os.getcwd(), PREBLT_TOOLS, "Nucle
     sys.stdout.flush()
     run_cmd("pio pkg install -g -t symlink://%s" % (os.path.join(nside_tools_loc, "gcc")))
     run_cmd("pio pkg install -g -t symlink://%s" % (os.path.join(nside_tools_loc, "openocd")))
-    run_cmd("pio pkg install -g -t symlink://%s" % (os.path.join(nside_tools_loc, "gd_openocd")))
+    if os.path.exists(os.path.join(nside_tools_loc, "gd_openocd")) == True:
+        run_cmd("pio pkg install -g -t symlink://%s" % (os.path.join(nside_tools_loc, "gd_openocd")))
     print("Install framework-nuclei-sdk from %s" % (nsdk_url))
     sys.stdout.flush()
     if os.path.isdir(nsdk_url):
@@ -297,9 +301,9 @@ if __name__ == '__main__':
     parser.add_argument('--install', action='store_true', help="Always install required tools")
     parser.add_argument('--into', default=PREBLT_TOOLS, help="Install required tools to desired location")
     parser.add_argument('--pio', action='store_true', help="Setup PIO Package")
-    parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk#feature/gd32vw55x", help='URL or PATH of Nuclei SDK')
+    parser.add_argument('--sdk', "-s", default="https://github.com/Nuclei-Software/nuclei-sdk", help='URL or PATH of Nuclei SDK >= 0.6.0')
     parser.add_argument('--ide', help='Nuclei Studio IDE PATH, such as C:\\Software\\NucleiStudio')
-    parser.add_argument('--gdocd', help='GD OpenOCD PATH, such as C:\\Work\\openocd_v1.2.2\\xpack-openocd-0.11.0-3')
+    parser.add_argument('--gdocd', help='GD OpenOCD PATH, such as C:\\Work\\openocd_v1.2.2\\xpack-openocd-0.11.0-3, if using Nuclei Studio 2024.06, no need to install gd openocd')
     parser.add_argument('--force', action='store_true', help='Force reinstall the package.json file if existed!')
 
     args = parser.parse_args()

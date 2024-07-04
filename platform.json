@@ -17,7 +17,7 @@
     "type": "git",
     "url": "https://github.com/Nuclei-Software/platform-nuclei.git"
   },
-  "version": "1.1.0",
+  "version": "1.2.0",
   "frameworks": {
     "nuclei-sdk": {
       "package": "framework-nuclei-sdk",
@@ -30,22 +30,17 @@
   "packages": {
     "toolchain-riscv-nuclei": {
       "type": "toolchain",
-      "version": "~1.0.0"
+      "version": "~1.1.0"
     },
     "framework-nuclei-sdk": {
       "optional": true,
       "type": "framework",
-      "version": "~0.5.1-dev"
+      "version": "~0.6.0"
     },
     "tool-openocd-nuclei": {
       "optional": true,
       "type": "uploader",
-      "version": "~1.0.0"
-    },
-    "tool-openocd-gd32": {
-      "optional": true,
-      "type": "uploader",
-      "version": "~1.0.0"
+      "version": "~1.1.0"
     },
     "tool-jlink": {
       "type": "uploader",

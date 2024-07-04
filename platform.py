@@ -161,9 +161,6 @@ class NucleiPlatform(PlatformBase):
                     "onboard": link in debug.get("onboard_tools", []),
                     "default": link in debug.get("default_tools", []),
                 }
-            # TODO workaround for gd32vw553h_eval board, we need to use gd32 distributed openocd
-            if build_board == "gd32vw553h_eval":
-                debug["tools"][link]["server"]["package"] = "tool-openocd-gd32"
 
         board.manifest["debug"] = debug
         return board
