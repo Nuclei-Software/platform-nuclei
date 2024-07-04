@@ -3,8 +3,11 @@
 [![Build Examples](https://github.com/Nuclei-Software/platform-nuclei/actions/workflows/build.yml/badge.svg?branch=feature%2Fgd32vw55x)](https://github.com/Nuclei-Software/platform-nuclei/actions/workflows/build.yml)
 
 > [!NOTE]
+>
 > If you want to use **platform-nuclei** with latest nuclei sdk(>=0.6.0) and toolchain offline, please follow
 > the steps list in [.github/workflows/build.yml](.github/workflows/build.yml).
+> 
+> Here is a [sample online doc](https://doc.weixin.qq.com/doc/w3_ASUAMQZqALwutPQJm8OTOOPy1OobX?scode=ABcAKgdSAFcdHdWdviASUAMQZqALw) in chinese to tell you how to use **platform-nuclei** for [GD32VW553H Evaluation Kit](https://www.gigadevice.com/product/mcu/risc-v/gd32vw553kmq7).
 >
 > And you can also take a try with **Nuclei Studio IDE**, which is built on Eclipse embedded CDT, see https://www.nucleisys.com/download.php#tools
 >
