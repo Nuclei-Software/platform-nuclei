@@ -101,7 +101,7 @@ def modify_json_file(old_file, file_path, system_value, force=False):
         print("%s already existed!" % (file_path))
         if force == False:
             return
-        print("Force reinstall this %s file!")
+        print("Force reinstall this %s file!" % (file_path))
 
     # Read the existing JSON file
     with open(old_file, "r") as json_file:
