@@ -35,7 +35,7 @@
     "framework-nuclei-sdk": {
       "optional": true,
       "type": "framework",
-      "version": "~0.6.0"
+      "version": ">=0.6.0"
     },
     "tool-openocd-nuclei": {
       "optional": true,
