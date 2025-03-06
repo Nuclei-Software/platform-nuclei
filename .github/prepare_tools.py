@@ -214,9 +214,9 @@ def prepare_tools(prebltloc=PREBLT_TOOLS, nside=None, gdocd=None, force=False):
     # if you provide a real installed nuclei studio path
     nsideloc = os.path.join(prebltloc, "NucleiStudio")
     # you can customize the url to your own url
-    nuclei_win_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202406-win64.zip"
+    nuclei_win_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202502-win64.zip"
     gd_openocd_win_url = ""
-    nuclei_linux_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202406-lin64.tgz"
+    nuclei_linux_url = "https://download.nucleisys.com/upload/files/nucleistudio/NucleiStudio_IDE_202502-lin64.tgz"
     gd_openocd_linux_url = ""
 
     nside_uri = None
